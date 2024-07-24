@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindicâncias Cadastradas</title>
+    <style>
+        body {
+            background-color: #D8BFD8; /* Fundo roxo claro */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #4B0082; /* Cor do título */
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #4B0082; /* Cor do cabeçalho */
+            color: white;
+        }
+        .button-container {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .button-container button {
+            padding: 10px 20px;
+            background-color: #4B0082; /* Cor do botão */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        .button-container button:hover {
+            background-color: #6A0DAD;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Sindicâncias Cadastradas</h2>
+
+
+        <!-- Tabela de Sindicâncias -->
+        <table>
+            <thead>
+                <tr>
+
+
+                    <th>Número</th>
+                    <th>Unidade</th>
+                    <th>Delegante</th>
+
+                    <th>Delegada</th>
+
+                    <th>Data Portaria</th>
+                    <th>Data Início</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sind in object_list %}
+                <tr>
+
+                    <td><a href="{% url 'inicio:detalhes_sindicancia' sind.id %}">{{sind}}<a/> </td>
+                    <td>{{sind.unidade}}</td>
+                    <td>{{ sind.posto_delegante|add:" " }}{{ sind.delegante }}</td>
+
+
+                    <td>{{sind.posto_delegada|add:" " }}{{ sind.delegada}}</td>
+                    <td>{{sind.data_portaria}}</td>
+                    <td>{{sind.data_inicio}}</td>
+
+                    <td>
+                        <button onclick="location.href='{% url 'inicio:editar_sindicancia' sind.id %}'">Editar</button>
+
+                        <form method="post" action="{% url 'inicio:excluir_sindicancia' sind.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button class="btn-delete" type="submit" onclick="return confirm('Tem certeza que deseja excluir esta sindicância?');">Excluir</button>
+                </form>
+                    </td>
+
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+        <!-- Botões -->
+        <div class="button-container">
+            <button onclick="location.href='{% url 'inicio:criar_sindicancia' %}'">Cadastrar Sindicância</button>
+
+        </div>
+    </div>
+</body>
+</html>

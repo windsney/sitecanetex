@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sind Fácil - Login</title>
+    <style>
+        body {
+            background-color: #D8BFD8; /* Fundo roxo claro */
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #4B0082; /* Cor do título */
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            padding: 10px;
+            background-color: #4B0082; /* Cor do botão */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #6A0DAD;
+        }
+        .link-button {
+            background-color: transparent;
+            color: #4B0082;
+            text-decoration: underline;
+            cursor: pointer;
+            text-align: center;
+        }
+        .link-button.no-hover:hover {
+            color: #4B0082; /* Mantém a cor original */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Saiu</h2>
+        <form>
+            <label for="usuario">Usuário</label>
+            <input type="text" id="usuario" name="usuario" required>
+
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" required>
+
+            <div class="buttons">
+                <a href="{% url 'inicio:criar_conta' %}">
+                <button type="submit">Logar</button>
+                </a>
+                <a href="{% url 'inicio:criar_conta' %}">
+                <button type="button" class="link-button no-hover" >Cadastrar</button>
+                </a>
+
+
+                <button type="button" class="link-button" onclick="window.location.href='esqueci-senha.html'">Esqueci a Senha</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

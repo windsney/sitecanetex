@@ -1,0 +1,250 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindicância Cadastrada </title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    <style>
+        body {
+            background-color: #D8BFD8; /* Fundo roxo claro */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #4B0082; /* Cor do título */
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4B0082; /* Cor do cabeçalho */
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4B0082; /* Cor do botão */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        button:hover {
+            background-color: #6A0DAD;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .action-buttons button {
+            margin-left: 10px;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <h2>Sindicância Portaria Nº{{ sindicancia.numero }}</h2>
+        <h4>Início dos Trabalhos: {{ sindicancia.data_inicio }}</h4>
+        <h5>Histórico: {{ sindicancia.historico }}</h5>
+        <h6>{{sindicancia.id}}</h6>
+        <h1> {{ dia_inicio }}</h1>
+
+
+
+
+       <h3>Sindicados</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Grad/Post</th>
+            <th>RGPM</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        {% for sindicado in sindicados.all %}
+        <tr>
+            <td>{{ sindicado.nome }}</td>
+            <td>{{ sindicado.posto_sindicado }}</td>
+            <td>{{ sindicado.rgpm }}</td>
+            <td>
+                <a href="{% url 'inicio:editar_sindicado' sindicancia.id sindicado.id %}">
+                    <button class="btn-edit">Editar/Declarar</button>
+                </a>
+
+                <a href="{% url 'inicio:declaracao_sindicado' sindicancia.id sindicado.id %}">
+                <button class="btn-docx">Gerar Declaração</button>
+                </a>
+
+                <form method="post" action="{% url 'inicio:excluir_sindicado' sindicancia.id sindicado.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button class="btn-delete" type="submit" onclick="return confirm('Tem certeza que deseja excluir este sindicado?');">Excluir</button>
+                </form>
+
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+    <div class="center-button">
+    <button onclick="location.href='{% url 'inicio:cadastrar_sindicado' sindicancia.id %}'">Cadastrar</button>
+    </div>
+
+
+        <h3>Testemunhas</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Rg</th>
+            <th>Endereço</th>
+            <th>Telefone</th>
+
+
+        </tr>
+    </thead>
+    <tbody>
+        {% for testemunha in testemunhas.all %}
+        <tr>
+            <td>{{ testemunha.nome }}</td>
+
+            <td>{{ testemunha.rgpm }}</td>
+            <td>{{ testemunha.endereco }}</td>
+            <td>{{ testemunha.telefone }}</td>
+            <td>
+
+                <a href="{% url 'inicio:editar_testemunha' sindicancia.id testemunha.id %}">
+                    <button class="btn-edit">Editar/Declarar</button>
+                </a>
+
+                <a href="{% url 'inicio:declaracao_testemunha' sindicancia.id testemunha.id %}">
+                <button class="btn-docx">Gerar Declaração</button>
+                </a>
+
+                <form method="post" action="{% url 'inicio:excluir_testemunha' sindicancia.id testemunha.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button class="btn-delete" type="submit" onclick="return confirm('Tem certeza que deseja excluir esta testemunha?');">Excluir</button>
+                </form>
+
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+    <div class="center-button">
+    <button onclick="location.href='{% url 'inicio:cadastrar_testemunha' sindicancia.id %}'">Cadastrar</button>
+    </div>
+
+
+        <h3>Ofendidos</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Rg</th>
+            <th>Endereço</th>
+            <th>Telefone</th>
+
+
+        </tr>
+    </thead>
+    <tbody>
+        {% for ofendido in ofendidos.all %}
+        <tr>
+            <td>{{ ofendido.nome }}</td>
+
+            <td>{{ ofendido.rgpm }}</td>
+            <td>{{ ofendido.endereco }}</td>
+            <td>{{ ofendido.telefone }}</td>
+            <td>
+
+                <a href="{% url 'inicio:editar_ofendido' sindicancia.id ofendido.id %}">
+                    <button class="btn-edit">Editar/Declarar</button>
+                </a>
+
+                <a href="{% url 'inicio:declaracao_ofendido' sindicancia.id ofendido.id %}">
+                <button class="btn-docx">Gerar Declaração</button>
+                </a>
+
+                <form method="post" action="{% url 'inicio:excluir_ofendido' sindicancia.id ofendido.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button class="btn-delete" type="submit" onclick="return confirm('Tem certeza que deseja excluir esta ofendido?');">Excluir</button>
+                </form>
+
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+    <div class="center-button">
+    <button onclick="location.href='{% url 'inicio:cadastrar_ofendido' sindicancia.id %}'">Cadastrar</button>
+    </div>
+
+        <h3>Ofícios</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ofício</th>
+                    <th>Data</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Adicione linhas conforme necessário -->
+            </tbody>
+        </table>
+        <div class="action-buttons">
+            <button>Cadastrar</button>
+            <button>Editar</button>
+            <button>Excluir</button>
+        </div>
+
+        <div class="button-container">
+             <a href="{% url 'inicio:inicio_dos_trabalhos' sindicancia.id %}">
+                <button>Ofício de Início dos Trabalhos</button>
+            </a>
+
+            <button>Citação</button>
+
+            <a href="{% url 'inicio:relatorio_sind' sindicancia.id %}">
+                <button>Gerar Relatório</button>
+            </a>
+
+            <button onclick="location.href='{% url 'inicio:sind_cadastradas' %}'"> Voltar</button>
+
+        </div>
+    </div>
+</body>
+</html>

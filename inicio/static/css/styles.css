@@ -1,0 +1,60 @@
+/* Estilo para botão Editar */
+.btn-edit {
+    background-color: #f0c040;
+    border: none;
+    color: black;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-edit:hover {
+    background-color: #e5b732;
+    color: white;
+}
+
+.btn-docx {
+    background-color: #add8e6;
+    border: none;
+    color: black;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-docx:hover {
+    background-color: #94bfcf;
+    color: white;
+}
+
+/* Estilo para botão Excluir */
+.btn-delete {
+    background-color: #e74c3c;
+    border: none;
+    color: black;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-delete:hover {
+    background-color: #c0392b;
+    color: white;
+}
+
+
+
+/* Estilo para centralizar o botão */
+.center-button {
+    text-align: center;
+    margin-top: 20px; /* Ajuste conforme necessário */
+}

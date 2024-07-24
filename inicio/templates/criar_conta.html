@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta</title>
+    <style>
+        body {
+            background-color: #D8BFD8; /* Fundo roxo claro */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #4B0082; /* Cor do título */
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            color: #4B0082;
+        }
+        input[type="text"],
+        input[type="password"],
+        select {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .button-container {
+            text-align: center;
+        }
+        .button-container button {
+            padding: 10px 20px;
+            background-color: #4B0082; /* Cor do botão */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        .button-container button:hover {
+            background-color: #6A0DAD;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Criar Conta</h2>
+        <form action="{% url 'criar_conta' %}" method="POST">
+            {% csrf_token %}
+            <label for="nome_completo">Nome Completo</label>
+            <input type="text" id="nome_completo" name="nome_completo" required>
+
+            <label for="comando_regional">Comando Regional</label>
+            <input type="text" id="comando_regional" name="comando_regional" required>
+
+            <label for="unidade">Unidade</label>
+            <input type="text" id="unidade" name="unidade" required>
+
+            <label for="posto_grad">Posto/Grad</label>
+            <select id="posto_grad" name="posto_grad" required>
+                <option value="3º Sgt PM">3º Sgt PM</option>
+                <option value="2º Sgt PM">2º Sgt PM</option>
+                <option value="1º Sgt PM">1º Sgt PM</option>
+                <option value="SubTen PM">SubTen PM</option>
+                <option value="Asp Of PM">Asp Of PM</option>
+                <option value="2º Ten PM">2º Ten PM</option>
+                <option value="1º Ten PM">1º Ten PM</option>
+                <option value="Cap PM">Cap PM</option>
+                <option value="Maj PM">Maj PM</option>
+                <option value="Ten Cel PM">Ten Cel PM</option>
+                <option value="Cel PM">Cel PM</option>
+            </select>
+
+            <label for="rgpm">RGPM</label>
+            <input type="text" id="rgpm" name="rgpm" required>
+
+            <label for="usuario">Usuário</label>
+            <input type="text" id="usuario" name="usuario" required>
+
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" required>
+
+            <div class="button-container">
+                <button type="submit">Criar Conta</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

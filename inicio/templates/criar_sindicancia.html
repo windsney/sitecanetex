@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Sindicância</title>
+    <style>
+        body {
+            background-color: #D8BFD8; /* Fundo roxo claro */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #4B0082; /* Cor do título */
+            margin-bottom: 20px;
+        }
+        form {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .button-container {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .button-container button {
+            padding: 10px 20px;
+            background-color: #4B0082; /* Cor do botão */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        .button-container button:hover {
+            background-color: #6A0DAD;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Criar Sindicância</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_numero">Número</label>
+                {{ form.numero }}
+            </div>
+            <div class="form-group">
+                <label for="id_unidade">Comando Regional</label>
+                {{ form.unidade }}
+            </div>
+            <div class="form-group">
+                <label for="id_delegante">Delegante</label>
+                {{ form.delegante }}
+            </div>
+            <div class="form-group">
+                <label for="id_posto_delegante">Posto Delegante</label>
+                {{ form.posto_delegante }}
+
+            </div>
+            <div class="form-group">
+                <label for="id_funcao_delegante">Função Delegante</label>
+                {{ form.funcao_delegante }}
+            </div>
+            <div class="form-group">
+                <label for="id_delegada">Delegada</label>
+                {{ form.delegada }}
+            </div>
+            <div class="form-group">
+                <label for="id_posto_delegada">Posto Delegada</label>
+                {{ form.posto_delegada }}
+            </div>
+            <div class="form-group">
+                <label for="id_rg_delegada">RG Delegada</label>
+                {{ form.rg_delegada }}
+            </div>
+            <div class="form-group">
+                <label for="id_data_portaria">Data Portaria</label>
+                {{ form.data_portaria }}
+            </div>
+            <div class="form-group">
+                <label for="id_dia_recebido">Data de Recebimento</label>
+                {{ form.dia_recebido }}
+            </div>
+            <div class="form-group">
+                <label for="id_data_inicio">Data de Início</label>
+                {{ form.data_inicio }}
+            </div>
+            <div class="form-group">
+                <label for="id_historico">Histórico</label>
+                {{ form.historico }}
+            </div>
+            <div class="form-group">
+                <label for="id_usuario">Usuário</label>
+                {{ form.usuario }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_bairro_quartel">Bairro do Quartel</label>
+                {{ form.bairro_quartel }}
+            </div>
+            <div class="form-group">
+                <label for="id_cep_quartel">CEP do Quartel</label>
+                {{ form.cep_quartel }}
+            </div>
+            <div class="form-group">
+                <label for="id_cidade_quartel">Cidade do Quartel</label>
+                {{ form.cidade_quartel }}
+            </div>
+            <div class="form-group">
+                <label for="id_email_quartel">E-mail do Quartel</label>
+                {{ form.email_quartel }}
+            </div>
+            <div class="form-group">
+                <label for="id_lotacao_delegada">Lotação Delegada</label>
+                {{ form.lotacao_delegada }}
+            </div>
+            <div class="form-group">
+                <label for="id_numero_quartel">Número do Quartel</label>
+                {{ form.numero_quartel }}
+            </div>
+            <div class="form-group">
+                <label for="id_rua_quartel">Rua do Quartel</label>
+                {{ form.rua_quartel }}
+            </div>
+            <div class="form-group">
+                <label for="id_telefone_quartel">Telefone do Quartel</label>
+                {{ form.telefone_quartel }}
+            </div>
+            <div class="button-container">
+                <button type="submit">Enviar</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
