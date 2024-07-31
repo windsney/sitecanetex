@@ -143,6 +143,15 @@ class Riog (models.Model):
         return self.numero
 
 class Usuario(AbstractUser):
+    nome_completo=models.CharField(max_length=100)
     posto=models.CharField(max_length=100)
     cr=models.CharField(max_length=100)
     unidade=models.CharField(max_length=100)
+    rgpm=models.CharField(max_length=10)
+    rua=models.CharField(max_length=100)
+    numero=models.CharField(max_length=100)
+    bairro=models.CharField(max_length=100)
+    cidade=models.CharField(max_length=100)
+    cep=models.CharField(max_length=100)
+    email_bpm=models.CharField(max_length=100)
+    telefone=models.CharField(max_length=100)

@@ -1,10 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render,reverse
 from .models import Sindicancia,Sindicado,Ofendido,Testemunha
-from django.views.generic import TemplateView,ListView,DetailView
+from django.views.generic import TemplateView,ListView,DetailView, FormView
+
 import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.conf import settings
-from .forms import SindicadoForm,SindicanciaForm,TestemunhaForm,OfendidoForm
+from .forms import SindicadoForm,SindicanciaForm,TestemunhaForm,OfendidoForm,UsuarioForm
 from datetime import datetime
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -24,15 +25,16 @@ from docxtpl import DocxTemplate
 from django.http import HttpResponse
 from meu_modulo.data_escrita import *
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 
 
 
 
 
-class Home(TemplateView):
-    template_name = "home.html"
-
+'''class Home(TemplateView):
+    template_name = "login.html"
+'''
 
 class Sind_Cadastradas(LoginRequiredMixin,ListView):
 
@@ -59,19 +61,20 @@ class Inquerito (TemplateView):
 
 class RIOG(TemplateView):
     template_name = "cad_riog.html"
-def criar_conta(request):
-    usuario='windsney'
-    if request.method == 'POST':
-        form = SindicanciaForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('inicio:criar_conta')  # Redirecione para uma página de sucesso após salvar
-    else:
-        form = SindicanciaForm()
-    return render(request, 'criar_conta.html', {'form': form})
+class Criar_conta(FormView):
+    template_name = "criar_conta.html"
+    form_class = UsuarioForm
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
 
+    def get_success_url(self):
+        return reverse('inicio:login')
+
+
+@login_required(login_url='/')
 def criar_sindicancia(request):
-    usuario='windsney'
+    usuario= request.user.rgpm
     if request.method == 'POST':
         form = SindicanciaForm(request.POST)
         if form.is_valid():
@@ -79,11 +82,11 @@ def criar_sindicancia(request):
             return redirect('inicio:sind_cadastradas')  # Redirecione para uma página de sucesso após salvar
     else:
         form = SindicanciaForm()
-    return render(request, 'criar_sindicancia.html', {'form': form})
+    return render(request, 'criar_sindicancia.html', {'form': form,'usuario':usuario})
 
-
+@login_required(login_url='/')
 def editar_sindicancia(request, id):
-    usuario = 'windsney'
+    usuario = request.user.rgpm
     sindicancia = get_object_or_404(Sindicancia, id=id)
 
     if request.method == 'POST':
@@ -98,7 +101,7 @@ def editar_sindicancia(request, id):
 
     return render(request, 'editar_sindicancia.html', {'form': form, 'sindicancia': sindicancia})
 
-
+@login_required(login_url='/')
 def excluir_sindicancia(request, id):
     sindicancia = get_object_or_404(Sindicancia, id=id)
 
@@ -107,6 +110,7 @@ def excluir_sindicancia(request, id):
         return redirect('inicio:sind_cadastradas')  # Redirecionar após exclusão
 
     return render(request,'sindicancias_cadastradas.html' , {'sindicancia': sindicancia})
+@login_required(login_url='/')
 def detalhes_sindicancia(request, sindicancia_id):
 
 
@@ -115,6 +119,8 @@ def detalhes_sindicancia(request, sindicancia_id):
     sindicados = sindicancia.sindicados.all()
     testemunhas = sindicancia.testemunhas.all()
     ofendidos = sindicancia.ofendidos.all()
+    email = request.user.telefone
+
 
     # Adicione as queries para testemunhas, ofendidos e ofícios conforme necessário
     # testemunhas = sindicancia.testemunhas.all()
@@ -131,6 +137,7 @@ def detalhes_sindicancia(request, sindicancia_id):
         'sindicados': sindicados,
         'testemunhas': testemunhas,
         'ofendidos': ofendidos,
+        'user_email': email,
 
         # Adicione as queries para testemunhas, ofendidos e ofícios conforme necessário
         # 'testemunhas': testemunhas,
@@ -142,7 +149,7 @@ def detalhes_sindicancia(request, sindicancia_id):
 
 
     return render(request, 'detalhe_sind.html', context)
-
+@login_required(login_url='/')
 def gerar_inicio_dos_trabalhos(request, sindicancia_id):
     template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'inicio_dos_trabalhos.docx')
 
@@ -212,7 +219,7 @@ def gerar_inicio_dos_trabalhos(request, sindicancia_id):
     return response
 
 
-
+@login_required(login_url='/')
 def gerar_declaracao_sindicado(request,sindicancia_id,id):
     sindicado = get_object_or_404(Sindicado, id=id)
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
@@ -332,7 +339,7 @@ def gerar_declaracao_sindicado(request,sindicancia_id,id):
     return response
 
 
-
+@login_required(login_url='/')
 def gerar_declaracao_testemunha(request,sindicancia_id,id):
     testemunha = get_object_or_404(Testemunha, id=id)
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
@@ -451,7 +458,7 @@ def gerar_declaracao_testemunha(request,sindicancia_id,id):
 
     return response
 
-
+@login_required(login_url='/')
 def gerar_declaracao_ofendido(request, sindicancia_id, id):
     ofendido = get_object_or_404(Ofendido, id=id)
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
@@ -562,7 +569,7 @@ def gerar_declaracao_ofendido(request, sindicancia_id, id):
 
 
 
-
+@login_required(login_url='/')
 def gerar_relatorio(request, sindicancia_id):
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
     template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'relatorio_modelo.docx')
@@ -608,7 +615,7 @@ def gerar_relatorio(request, sindicancia_id):
 
     return response
 
-
+@login_required(login_url='/')
 def cadastrar_sindicado(request, sindicancia_id):
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
 
@@ -624,7 +631,7 @@ def cadastrar_sindicado(request, sindicancia_id):
 
     return render(request, 'cadastrar_sindicado.html', {'form': form, 'sindicancia': sindicancia})
 
-
+@login_required(login_url='/')
 def editar_sindicado(request,sindicancia_id, id):
     sindicado = get_object_or_404(Sindicado, id=id)
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
@@ -638,7 +645,7 @@ def editar_sindicado(request,sindicancia_id, id):
 
 
     return render(request, 'editar_sindicado.html', {'form': form,'sindicado':sindicado,'sindicancia':sindicancia})
-
+@login_required(login_url='/')
 def excluir_sindicado(request, sindicancia_id, id):
     sindicado = get_object_or_404(Sindicado, id=id)
     if request.method == 'POST':
@@ -648,8 +655,7 @@ def excluir_sindicado(request, sindicancia_id, id):
 
 
 
-
-
+@login_required(login_url='/')
 def cadastrar_testemunha(request, sindicancia_id):
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
 
@@ -665,7 +671,7 @@ def cadastrar_testemunha(request, sindicancia_id):
 
     return render(request, 'cadastrar_testemunha.html', {'form': form, 'sindicancia': sindicancia})
 
-
+@login_required(login_url='/')
 def editar_testemunha(request,sindicancia_id, id):
     testemunha = get_object_or_404(Testemunha, id=id)
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
@@ -679,7 +685,7 @@ def editar_testemunha(request,sindicancia_id, id):
 
 
     return render(request, 'editar_testemunha.html', {'form': form,'testemunha':testemunha,'sindicancia':sindicancia})
-
+@login_required(login_url='/')
 def excluir_testemunha(request, sindicancia_id, id):
     testemunha = get_object_or_404(Testemunha, id=id)
     if request.method == 'POST':
@@ -687,7 +693,7 @@ def excluir_testemunha(request, sindicancia_id, id):
         return redirect('inicio:detalhes_sindicancia', sindicancia_id=sindicancia_id)
     return render(request, 'sindicancias_cadastradas.html', {'testemunha': testemunha})
 
-
+@login_required(login_url='/')
 def cadastrar_ofendido(request, sindicancia_id):
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
 
@@ -703,7 +709,7 @@ def cadastrar_ofendido(request, sindicancia_id):
 
     return render(request, 'cadastrar_ofendido.html', {'form': form, 'sindicancia': sindicancia})
 
-
+@login_required(login_url='/')
 def editar_ofendido(request,sindicancia_id, id):
     ofendido = get_object_or_404(Ofendido, id=id)
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
@@ -717,7 +723,7 @@ def editar_ofendido(request,sindicancia_id, id):
 
 
     return render(request, 'editar_ofendido.html', {'form': form,'ofendido':ofendido,'sindicancia':sindicancia})
-
+@login_required(login_url='/')
 def excluir_ofendido(request, sindicancia_id, id):
     ofendido = get_object_or_404(Ofendido, id=id)
     if request.method == 'POST':

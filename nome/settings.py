@@ -130,4 +130,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL='inicio:sind_cadastradas'
 
-LOGIN_URL='inicio:home'
+LOGIN_URL='inicio:login'

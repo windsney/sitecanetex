@@ -3,7 +3,7 @@
 from django.urls import path
 
 import inicio.views
-from.views import Home,Sind_Cadastradas,Cd,Inquerito,RIOG
+from.views import Sind_Cadastradas,Cd,Inquerito,RIOG,Criar_conta
 from django.contrib.auth import views as auth_view
 
 app_name='inicio'
@@ -13,9 +13,9 @@ urlpatterns = [
     path('sind_cadastradas', Sind_Cadastradas.as_view(),name='sind_cadastradas'),
     path('cad_cd', Cd.as_view(),name='cd'),
     path('cad_riog', RIOG.as_view(),name='riog'),
-    path('',auth_view.LoginView.as_view(template_name='home.html'),name='home'),
-    path('',auth_view.LogoutView.as_view(template_name='out.html'),name='out'),
-    path('criar_conta/', inicio.views.criar_conta, name='criar_conta'),
+    path('', auth_view.LoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', auth_view.LogoutView.as_view(next_page='inicio:login'), name='logout'),
+    path('criar_conta/', Criar_conta.as_view(), name='criar_conta'),
     #path('cad_sind/<int:pk>',Detalhe_sind.as_view(), name='detalhe'),
     #path('cad_investigado_sind/<int:pk>',Cadastro_investigado_sind.as_view(), name='cadastro_investigado_sind'),
     path('sindicancia/<int:sindicancia_id>/cadastrar_sindicado/', inicio.views.cadastrar_sindicado, name='cadastrar_sindicado'),

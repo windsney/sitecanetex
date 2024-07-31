@@ -171,4 +171,3 @@ def ano_escrito(dia):
         return(dies)
 
     
-print(dia_escrito(26),'de',mes_escrito(12),ano_escrito(2024))

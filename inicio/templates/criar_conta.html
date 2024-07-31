@@ -12,16 +12,17 @@
             padding: 20px;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Alinha os itens no início verticalmente */
             height: 100vh;
         }
         .container {
-            width: 90%;
-            max-width: 500px;
+            width: 100%;
+            max-width: 600px; /* Aumenta a largura máxima */
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 100px; /* Aumenta a distância do topo */
         }
         h2 {
             text-align: center;
@@ -38,12 +39,14 @@
         }
         input[type="text"],
         input[type="password"],
+        input[type="email"],
         select {
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
+            width: 100%; /* Garante que os campos ocupem toda a largura do contêiner */
         }
         .button-container {
             text-align: center;
@@ -65,41 +68,12 @@
 <body>
     <div class="container">
         <h2>Criar Conta</h2>
-        <form action="{% url 'criar_conta' %}" method="POST">
+        <form method="POST">
             {% csrf_token %}
-            <label for="nome_completo">Nome Completo</label>
-            <input type="text" id="nome_completo" name="nome_completo" required>
-
-            <label for="comando_regional">Comando Regional</label>
-            <input type="text" id="comando_regional" name="comando_regional" required>
-
-            <label for="unidade">Unidade</label>
-            <input type="text" id="unidade" name="unidade" required>
-
-            <label for="posto_grad">Posto/Grad</label>
-            <select id="posto_grad" name="posto_grad" required>
-                <option value="3º Sgt PM">3º Sgt PM</option>
-                <option value="2º Sgt PM">2º Sgt PM</option>
-                <option value="1º Sgt PM">1º Sgt PM</option>
-                <option value="SubTen PM">SubTen PM</option>
-                <option value="Asp Of PM">Asp Of PM</option>
-                <option value="2º Ten PM">2º Ten PM</option>
-                <option value="1º Ten PM">1º Ten PM</option>
-                <option value="Cap PM">Cap PM</option>
-                <option value="Maj PM">Maj PM</option>
-                <option value="Ten Cel PM">Ten Cel PM</option>
-                <option value="Cel PM">Cel PM</option>
-            </select>
-
-            <label for="rgpm">RGPM</label>
-            <input type="text" id="rgpm" name="rgpm" required>
-
-            <label for="usuario">Usuário</label>
-            <input type="text" id="usuario" name="usuario" required>
-
-            <label for="senha">Senha</label>
-            <input type="password" id="senha" name="senha" required>
-
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Crie uma conta para continuar</legend>
+                {{ form.as_p }}
+            </fieldset>
             <div class="button-container">
                 <button type="submit">Criar Conta</button>
             </div>

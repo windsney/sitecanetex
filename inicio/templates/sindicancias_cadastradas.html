@@ -61,6 +61,10 @@
 <body>
     <div class="container">
         <h2>Sindicâncias Cadastradas</h2>
+         <form method="post" action="{% url 'inicio:logout' %}">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+        </form>
 
 
         <!-- Tabela de Sindicâncias -->

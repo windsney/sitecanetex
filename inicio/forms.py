@@ -1,5 +1,6 @@
 from django import forms
-from .models import Sindicado,Sindicancia,Testemunha,Ofendido
+from django.contrib.auth.forms import UserCreationForm
+from .models import Sindicado,Sindicancia,Testemunha,Ofendido,Usuario
 
 class SindicadoForm(forms.ModelForm):
     class Meta:
@@ -77,3 +78,47 @@ class SindicanciaForm(forms.ModelForm):
         for field in ['data_portaria', 'data_inicio', 'dia_recebido']:
             if self.initial.get(field):
                 self.initial[field] = self.initial[field].strftime('%Y-%m-%d')
+
+
+class UsuarioForm(UserCreationForm):
+    class Meta:
+        model = Usuario
+        fields = ['nome_completo','cr','unidade','posto','rgpm','username', 'password1', 'password2','rua','numero','bairro','cidade','cep','email','telefone']
+
+        widgets = {
+            'nome_completo': forms.TextInput(attrs={'placeholder': 'Nome Completo'}),
+            'cr': forms.TextInput(attrs={'placeholder': 'CR'}),
+            'unidade': forms.TextInput(attrs={'placeholder': 'Unidade'}),
+            'posto': forms.TextInput(attrs={'placeholder': 'Posto'}),
+            'rgpm': forms.TextInput(attrs={'placeholder': 'RGPM'}),
+            'username': forms.TextInput(attrs={'placeholder': 'Username'}),
+            'password1': forms.PasswordInput(attrs={'placeholder': 'Password'}),
+            'password2': forms.PasswordInput(attrs={'placeholder': 'Confirm Password'}),
+            'rua': forms.TextInput(attrs={'placeholder': 'Rua da sua UPM'}),
+            'numero': forms.TextInput(attrs={'placeholder': 'Número da sua UPM'}),
+            'bairro': forms.TextInput(attrs={'placeholder': 'Bairro da sua UPM'}),
+            'cidade': forms.TextInput(attrs={'placeholder': 'Cidade-UF da sua UPM'}),
+            'cep': forms.TextInput(attrs={'placeholder': 'CEP da sua UPM'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Email da sua UPM'}),
+            'telefone': forms.TextInput(attrs={'placeholder': 'Telefone da sua UPM'}),
+        }
+        labels = {
+            'cr': 'Comando Regional/Diretoria',
+        }
+
+    POSTO_CHOICES = [
+        ('3º Sgt PM', '3º Sgt PM'),
+        ('2º Sgt PM', '2º Sgt PM'),
+        ('1º Sgt PM', '1º Sgt PM'),
+        ('Sub Ten PM', 'Sub Ten PM'),
+        ('Asp Of PM', 'Asp Of PM'),
+        ('2º Ten PM', '2º Ten PM'),
+        ('1º Ten PM', '1º Ten PM'),
+        ('Cap PM', 'Cap PM'),
+        ('Maj PM', 'Maj PM'),
+        ('Ten Cel PM', 'Ten Cel PM'),
+        ('Cel PM', 'Cel PM'),
+    ]
+
+    posto = forms.ChoiceField(choices=POSTO_CHOICES)
+

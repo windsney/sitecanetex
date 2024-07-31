@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 
 campos= list(UserAdmin.fieldsets)
 campos.append(
-    ("Informações profissionais",{'fields':('posto','cr','unidade')})
+    ("Informações profissionais",{'fields':('nome_completo','posto','cr','unidade','rgpm','rua','numero','bairro','cidade','cep','email_bpm','telefone')})
 )
 
 UserAdmin.fieldsets=tuple(campos)
