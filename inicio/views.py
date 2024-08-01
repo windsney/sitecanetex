@@ -41,6 +41,10 @@ class Sind_Cadastradas(LoginRequiredMixin,ListView):
     template_name = "sindicancias_cadastradas.html"
     model = Sindicancia
 
+    def get_queryset(self):
+        # Filtra as sindicâncias para exibir apenas as cadastradas pelo usuário logado
+        return Sindicancia.objects.filter(usuario=self.request.user.id)
+
 '''class Detalhe_sind(DetailView):
 
     template_name = "detalhe_sind.html"
@@ -74,10 +78,25 @@ class Criar_conta(FormView):
 
 @login_required(login_url='/')
 def criar_sindicancia(request):
-    usuario= request.user.rgpm
+    usuario= request.user.id
     if request.method == 'POST':
         form = SindicanciaForm(request.POST)
         if form.is_valid():
+            sindicancia = form.save(commit=False)
+            sindicancia.usuario = request.user.id  # Atribui o valor de id do usuário ao objeto
+            sindicancia.delegada = request.user.nome_completo
+            sindicancia.unidade= request.user.unidade
+            sindicancia.posto_delegada= request.user.posto
+            sindicancia.rg_delegada= request.user.rgpm
+            sindicancia.lotacao_delegada= request.user.unidade
+            sindicancia.rua_quartel= request.user.rua
+            sindicancia.numero_quartel= request.user.numero
+            sindicancia.bairro_quartel= request.user.bairro
+            sindicancia.email_quartel= request.user.email_bpm
+            sindicancia.telefone_quartel= request.user.telefone
+            sindicancia.cep_quartel= request.user.cep
+            sindicancia.cidade_quartel= request.user.cidade
+            sindicancia.save()
             form.save()
             return redirect('inicio:sind_cadastradas')  # Redirecione para uma página de sucesso após salvar
     else:
@@ -86,7 +105,7 @@ def criar_sindicancia(request):
 
 @login_required(login_url='/')
 def editar_sindicancia(request, id):
-    usuario = request.user.rgpm
+    usuario = request.user.id
     sindicancia = get_object_or_404(Sindicancia, id=id)
 
     if request.method == 'POST':
@@ -572,16 +591,100 @@ def gerar_declaracao_ofendido(request, sindicancia_id, id):
 @login_required(login_url='/')
 def gerar_relatorio(request, sindicancia_id):
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
+
+    sindicados = Sindicado.objects.filter(portaria_id=sindicancia_id)
+    usuario = request.user
+
+#____________base de dados_______________________________________________
+
+
     template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'relatorio_modelo.docx')
     # Criar um novo documento
     doc = Document(template_path)
+    cr = usuario.cr.upper()
+    unidade = usuario.unidade.upper()
+
+    header_texts = [
+        "POLÍCIA MILITAR DO ESTADO DE MATO GROSSO",
+        f"{cr}",
+        f"{unidade}"
+    ]
+
+    for text in header_texts:
+        paragraph = doc.add_paragraph(text)
+        paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        run = paragraph.runs[0]
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(12)
+        r = run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+        paragraph_format = paragraph.paragraph_format
+        paragraph_format.space_after = Pt(0)
+        paragraph_format.space_before = Pt(0)
+
+# ____________________titulo cabeçalho___________________________________________________
+
+    report_title = doc.add_paragraph("RELATÓRIO")
+    report_title.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    run = report_title.runs[0]
+    run.font.name = 'Times New Roman'
+    run.font.size = Pt(14)
+    run.bold = True
+    run.underline = True
+    r = run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    # Adicionar espaçamento duplo antes do título "Relatório"
+    report_title_format = report_title.paragraph_format
+    report_title_format.space_after = Pt(24)  # Espaço duplo
+    report_title_format.space_before = Pt(24)  # Espaço duplo
+
+    #_____________________________ tituto relatorio___________________
+
+    dados_paragraph = doc.add_paragraph()
+    dados_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    run1 = dados_paragraph.add_run("1. ")
+    run2 = dados_paragraph.add_run("Dados")
+    run1.font.name = 'Times New Roman'
+    run1.font.size = Pt(12)
+    run2.font.name = 'Times New Roman'
+    run2.font.size = Pt(12)
+    run2.bold = True
+    run2.underline = True
+    run1.bold = False
+
+    #1. dados__________________________________________________________________
+
+    for sindicado in sindicados:
+        doc.add_paragraph("")  # Linha em branco entre os sindicados
+
+        # Adicionar informações da sindicância
+        doc.add_paragraph(f"Portaria: {sindicancia.numero.upper()}", style='Normal')
+
+        # Adicionar informações do sindicado
+        sindicado_paragraph = doc.add_paragraph()
+        sindicado_paragraph.add_run(f"Sindicado: {sindicado.nome.upper()}").bold = True
+        sindicado_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        run = sindicado_paragraph.runs[0]
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(12)
+        run.bold = True
+# sindicados e portaria ________________________________________________________________________
+    for sindicado in sindicados:
+        doc.add_paragraph(f"Nome do Sindicado: {sindicado.nome}")
+        doc.add_paragraph(f"RGPM do Sindicado: {sindicado.rgpm}")
 
 
     # Adiciona um parágrafo com o texto desejado
     paragrafo = doc.add_paragraph()
     run = paragrafo.add_run(
-        "Este é um texto em itálico e com recfdfdfjdflkdjfkdjflkdjflkdsjfldkfjdlskfjdslkfjdlfjdslfjdlfjdslfjlkjdfjdslfjdslkfjdslkfsdjflkjflksdfjdskfjdlfjkdlfjdskfjdflkjsdfklsdjflsdkfjsdklfjslkuo até o meio da página.")
+        f"Este é um texto em itálico e POrtaria nº {sindicancia.numero} e autoridade delegada o {sindicancia.posto_delegada} {sindicancia.delegada}  recfdfdfjdflkdjfkdjflkdjflkdsjfldkfjdlskfjdslkfjdlfjdslfjdlfjdslfjlkjdfjdslfjdslkfjdslkfsdjflkjflksdfjdskfjdlfjkdlfjdskfjdflkjsdfklsdjflsdkfjsdklfjslkuo até o meio da página.")
     run.italic = True
+    for sindicado in sindicados:
+        run = paragrafo.add_run(
+            f"disse o: {sindicado.nome} que {sindicado.declaracao}")
+        run.italic = True
 
     # Define o recuo do parágrafo até o meio da página (assumindo uma largura de página padrão de 21 cm)
     # Metade da página seria 10.5 cm

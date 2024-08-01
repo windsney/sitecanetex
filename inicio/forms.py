@@ -60,11 +60,10 @@ class SindicanciaForm(forms.ModelForm):
     class Meta:
         model = Sindicancia
         fields = [
-            'numero', 'unidade', 'delegante', 'posto_delegante', 'delegada',
-            'posto_delegada', 'rg_delegada', 'data_portaria', 'data_inicio',
-            'dia_recebido','historico', 'usuario', 'funcao_delegante',
-            'bairro_quartel', 'cep_quartel', 'cidade_quartel', 'email_quartel',
-            'lotacao_delegada', 'numero_quartel', 'rua_quartel', 'telefone_quartel'
+            'numero', 'delegante', 'posto_delegante',
+            'data_portaria', 'data_inicio',
+            'dia_recebido','historico', 'funcao_delegante'
+
         ]
 
         widgets = {
