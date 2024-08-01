@@ -23,6 +23,15 @@ class Sindicancia (models.Model):
     email_quartel=models.CharField(max_length=100,default=0)
 
 
+    rua_fato = models.CharField(max_length=100, default=0)
+    bairro_fato = models.CharField(max_length=100, default=0)
+    cidade_fato = models.CharField(max_length=100, default=0)
+    em_servico = models.CharField(max_length=10, default=0)
+    data_fato = models.DateField(default=date(2024, 7, 3))
+    hora_fato = models.CharField(max_length=20, default=0)
+
+
+
 
     data_portaria=models.DateField(default=date(2024, 7, 3))
     data_inicio= models.DateField(default=date(2024, 7, 3))

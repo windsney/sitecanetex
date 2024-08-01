@@ -1,7 +1,7 @@
 from django.shortcuts import render,reverse
 from .models import Sindicancia,Sindicado,Ofendido,Testemunha
 from django.views.generic import TemplateView,ListView,DetailView, FormView
-
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.conf import settings
@@ -593,7 +593,9 @@ def gerar_relatorio(request, sindicancia_id):
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
 
     sindicados = Sindicado.objects.filter(portaria_id=sindicancia_id)
+    ofendidos = Ofendido.objects.filter(portaria_id=sindicancia_id)
     usuario = request.user
+    testemunhas = Testemunha.objects.filter(portaria_id=sindicancia_id)
 
 #____________base de dados_______________________________________________
 
@@ -655,36 +657,181 @@ def gerar_relatorio(request, sindicancia_id):
     run1.bold = False
 
     #1. dados__________________________________________________________________
+    portaria_paragraph = doc.add_paragraph()
+    portaria_run = portaria_paragraph.add_run(f"Portaria nº: {sindicancia.numero.upper()}")
+    portaria_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    portaria_run.font.name = 'Times New Roman'
+    portaria_run.font.size = Pt(12)
+    r = portaria_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
 
-    for sindicado in sindicados:
-        doc.add_paragraph("")  # Linha em branco entre os sindicados
 
-        # Adicionar informações da sindicância
-        doc.add_paragraph(f"Portaria: {sindicancia.numero.upper()}", style='Normal')
+    if len(sindicados)==1: # verifica se tem um ou mais sindicados pra  colocar no plural se for o caso
 
-        # Adicionar informações do sindicado
         sindicado_paragraph = doc.add_paragraph()
-        sindicado_paragraph.add_run(f"Sindicado: {sindicado.nome.upper()}").bold = True
         sindicado_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-        run = sindicado_paragraph.runs[0]
-        run.font.name = 'Times New Roman'
-        run.font.size = Pt(12)
-        run.bold = True
-# sindicados e portaria ________________________________________________________________________
-    for sindicado in sindicados:
-        doc.add_paragraph(f"Nome do Sindicado: {sindicado.nome}")
-        doc.add_paragraph(f"RGPM do Sindicado: {sindicado.rgpm}")
+        sindicado_run = sindicado_paragraph.add_run("Sindicado: ")
+        sindicado_run.font.name = 'Times New Roman'
+        sindicado_run.font.size = Pt(12)
+        sindicado_run.bold = True  # Deixar a palavra "Sindicado" em negrito
+        r = sindicado_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+    else:
+        sindicado_paragraph = doc.add_paragraph()
+        sindicado_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        sindicado_run = sindicado_paragraph.add_run("Sindicados: ")
+        sindicado_run.font.name = 'Times New Roman'
+        sindicado_run.font.size = Pt(12)
+        sindicado_run.bold = False  # Deixar a palavra "Sindicado" em negrito
+        r = sindicado_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
 
+    for index, sindicado in enumerate(sindicados):
+        if index == 0:
+            sindicado_run = sindicado_paragraph.add_run(f"{sindicado.nome.upper()} - {sindicado.posto_sindicado.upper()}")
+            sindicado_run.font.name = 'Times New Roman'
+            sindicado_run.font.size = Pt(12)
+            r = sindicado_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+        else:
+            sindicado_nome_paragraph = doc.add_paragraph()
+            sindicado_nome_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+            sindicado_nome_paragraph.paragraph_format.left_indent = Pt(63)
+            sindicado_nome_run = sindicado_nome_paragraph.add_run(f"{sindicado.nome.upper()} - {sindicado.posto_sindicado.upper()}")
+            sindicado_nome_run.font.name = 'Times New Roman'
+            sindicado_nome_run.font.size = Pt(12)
+            r = sindicado_nome_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
 
-    # Adiciona um parágrafo com o texto desejado
-    paragrafo = doc.add_paragraph()
-    run = paragrafo.add_run(
-        f"Este é um texto em itálico e POrtaria nº {sindicancia.numero} e autoridade delegada o {sindicancia.posto_delegada} {sindicancia.delegada}  recfdfdfjdflkdjfkdjflkdjflkdsjfldkfjdlskfjdslkfjdlfjdslfjdlfjdslfjlkjdfjdslfjdslkfjdslkfsdjflkjflksdfjdskfjdlfjkdlfjdskfjdflkjsdfklsdjflsdkfjsdklfjslkuo até o meio da página.")
-    run.italic = True
+#________________________ sindicados nome alinhado e se tiver mais de um colocar sindicados
+
+    if len(ofendidos)==1: # verifica se tem um ou mais ofendido pra  colocar no plural se for o caso
+
+        ofendido_paragraph = doc.add_paragraph()
+        ofendido_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        ofendido_run = ofendido_paragraph.add_run("Ofendido: ")
+        ofendido_run.font.name = 'Times New Roman'
+        ofendido_run.font.size = Pt(12)
+        ofendido_run.bold = False  # Deixar a palavra "Sindicado" em negrito
+        r = ofendido_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+    else:
+        ofendido_paragraph = doc.add_paragraph()
+        ofendido_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        ofendido_run = ofendido_paragraph.add_run("Ofendidos: ")
+        ofendido_run.font.name = 'Times New Roman'
+        ofendido_run.font.size = Pt(12)
+        ofendido_run.bold = False  # Deixar a palavra "Sindicado" em negrito
+        r = ofendido_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    for index, ofendido in enumerate(ofendidos):
+        if index == 0:
+            ofendido_run = ofendido_paragraph.add_run(f"{ofendido.nome}")
+            ofendido_run.font.name = 'Times New Roman'
+            ofendido_run.font.size = Pt(12)
+            r = ofendido_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+        else:
+            ofendido_nome_paragraph = doc.add_paragraph()
+            ofendido_nome_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+            ofendido_nome_paragraph.paragraph_format.left_indent = Pt(58)
+            ofendido_nome_run = ofendido_nome_paragraph.add_run(f"{ofendido.nome}")
+            ofendido_nome_run.font.name = 'Times New Roman'
+            ofendido_nome_run.font.size = Pt(12)
+            r = ofendido_nome_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    ###########_________ adicioona ofendido ou plural se necessário
+
+    fato_paragraph = doc.add_paragraph()
+    fato_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    fato_paragraph.paragraph_format.first_line_indent = Pt(70)
+
+    fato_run = fato_paragraph.add_run(f"Fato (s): {sindicancia.historico}")
+    fato_run.font.name = 'Times New Roman'
+    fato_run.font.size = Pt(12)
+    r = fato_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    #________ coloca  o historico no  fato com espaço na primeira  linha  depois justificado.
+
+    local_paragraph = doc.add_paragraph()
+    local_run = local_paragraph.add_run(f"Local: {sindicancia.rua_fato}; Bairro {sindicancia.bairro_fato};Cidade {sindicancia.cidade_fato};")
+    local_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    local_run.font.name = 'Times New Roman'
+    local_run.font.size = Pt(12)
+    r = local_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    data_hora_paragraph = doc.add_paragraph()
+    data_formatada = sindicancia.data_fato.strftime('%d.%m.%Y')
+    data_hora_run = data_hora_paragraph.add_run(f"Data/Hora: {data_formatada}/{sindicancia.hora_fato}")
+    data_hora_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    data_hora_run.font.name = 'Times New Roman'
+    data_hora_run.font.size = Pt(12)
+    r = data_hora_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    em_servico_paragraph = doc.add_paragraph()
+    em_servico_run = em_servico_paragraph.add_run(f"Em Serviço? {sindicancia.em_servico}")
+    em_servico_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    em_servico_run.font.name = 'Times New Roman'
+    em_servico_run.font.size = Pt(12)
+    r = em_servico_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    testemunhas_ouvidas_paragraph = doc.add_paragraph()
+    testemunhas_ouvidas_run = testemunhas_ouvidas_paragraph.add_run(f"Testemunhas Ouvidas:")
+    testemunhas_ouvidas_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    testemunhas_ouvidas_run.font.name = 'Times New Roman'
+    testemunhas_ouvidas_run.font.size = Pt(12)
+    r = testemunhas_ouvidas_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    if len(testemunhas)==0:
+        testemunha_nome_paragraph = doc.add_paragraph()
+        testemunha_nome_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        testemunha_nome_paragraph.paragraph_format.left_indent = Pt(30)
+        testemunha_nome_run = testemunha_nome_paragraph.add_run(f"Não houveram testemunhas")
+        testemunha_nome_run.font.name = 'Times New Roman'
+        testemunha_nome_run.font.size = Pt(12)
+        r = testemunha_nome_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    else:
+
+        for testemunha in testemunhas:
+
+            testemunha_nome_paragraph = doc.add_paragraph()
+            testemunha_nome_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+            testemunha_nome_paragraph.paragraph_format.left_indent = Pt(30)
+            testemunha_nome_run = testemunha_nome_paragraph.add_run(f"\u25CF    {testemunha.nome} - fls _____")
+            testemunha_nome_run.font.name = 'Times New Roman'
+            testemunha_nome_run.font.size = Pt(12)
+            r = testemunha_nome_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
     for sindicado in sindicados:
+        sindicado_nome_paragraph = doc.add_paragraph()
+        sindicado_nome_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+        #sindicado_nome_paragraph.paragraph_format.left_indent = Pt(63)
+        sindicado_nome_run = sindicado_nome_paragraph.add_run(f" O Sindicado, {sindicado.nome.upper()} - {sindicado.posto_sindicado.upper()}, foi inquirido conforme fls:_____")
+        sindicado_nome_run.font.name = 'Times New Roman'
+        sindicado_nome_run.font.size = Pt(12)
+        r = sindicado_nome_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+        # Adiciona um parágrafo com o texto desejado
+        paragrafo = doc.add_paragraph()
         run = paragrafo.add_run(
-            f"disse o: {sindicado.nome} que {sindicado.declaracao}")
+            f"Este é um texto em itálico e POrtaria nº {sindicancia.numero} e autoridade delegada o {sindicancia.posto_delegada} {sindicancia.delegada}  recfdfdfjdflkdjfkdjflkdjflkdsjfldkfjdlskfjdslkfjdlfjdslfjdlfjdslfjlkjdfjdslfjdslkfjdslkfsdjflkjflksdfjdskfjdlfjkdlfjdskfjdflkjsdfklsdjflsdkfjsdklfjslkuo até o meio da página.")
         run.italic = True
+        for sindicado in sindicados:
+            run = paragrafo.add_run(
+                f"disse o: {sindicado.nome} que {sindicado.declaracao}")
+            run.italic = True
 
     # Define o recuo do parágrafo até o meio da página (assumindo uma largura de página padrão de 21 cm)
     # Metade da página seria 10.5 cm

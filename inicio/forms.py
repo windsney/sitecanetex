@@ -57,12 +57,21 @@ class OfendidoForm(forms.ModelForm):
                 self.initial[field] = self.initial[field].strftime('%Y-%m-%d')
 
 class SindicanciaForm(forms.ModelForm):
+    EM_SERVICO_CHOICES = [
+        ('SIM', 'Sim'),
+        ('NÃO', 'Não'),
+    ]
+
+    em_servico = forms.ChoiceField(choices=EM_SERVICO_CHOICES, widget=forms.Select)
+
     class Meta:
         model = Sindicancia
         fields = [
             'numero', 'delegante', 'posto_delegante',
             'data_portaria', 'data_inicio',
-            'dia_recebido','historico', 'funcao_delegante'
+            'dia_recebido','historico', 'funcao_delegante',
+            'rua_fato','bairro_fato','cidade_fato','em_servico',
+            'data_fato','hora_fato'
 
         ]
 
@@ -70,11 +79,12 @@ class SindicanciaForm(forms.ModelForm):
         'data_portaria': forms.DateInput(attrs={'type': 'date'}),
         'dia_recebido': forms.DateInput(attrs={'type': 'date'}),
         'data_inicio': forms.DateInput(attrs={'type': 'date'}),
+        'data_fato': forms.DateInput(attrs={'type': 'date', 'placeholder': 'dd/mm/aaaa'}, format='%d/%m/%Y'),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in ['data_portaria', 'data_inicio', 'dia_recebido']:
+        for field in ['data_portaria', 'data_inicio', 'dia_recebido','data_fato']:
             if self.initial.get(field):
                 self.initial[field] = self.initial[field].strftime('%Y-%m-%d')
 
