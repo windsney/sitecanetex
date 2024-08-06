@@ -61,6 +61,7 @@ class Sindicado (models.Model):
     lotacao = models.CharField(max_length=100,default=0)
     hora_inicio=models.CharField(max_length=50,default=0)
     hora_fim=models.CharField(max_length=50,default=0)
+    fls=models.CharField(max_length=50,default=0)
 
 
     def __str__(self):
@@ -84,6 +85,7 @@ class Testemunha (models.Model):
     profissao = models.CharField(max_length=100,default=0)
     hora_inicio=models.CharField(max_length=50,default=0)
     hora_fim=models.CharField(max_length=50,default=0)
+    fls=models.CharField(max_length=50, default=0)
 
     def __str__(self):
         return self.nome
@@ -106,6 +108,7 @@ class Ofendido (models.Model):
     profissao = models.CharField(max_length=100,default=0)
     hora_inicio=models.CharField(max_length=50,default=0)
     hora_fim=models.CharField(max_length=50,default=0)
+    fls = models.CharField(max_length=50, default=0)
 
     def __str__(self):
         return self.nome

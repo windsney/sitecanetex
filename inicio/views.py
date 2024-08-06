@@ -2,6 +2,7 @@ from django.shortcuts import render,reverse
 from .models import Sindicancia,Sindicado,Ofendido,Testemunha
 from django.views.generic import TemplateView,ListView,DetailView, FormView
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.style import WD_STYLE_TYPE
 import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.conf import settings
@@ -18,7 +19,7 @@ from django.conf import settings
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from docx import Document
-from docx.shared import Cm,Pt
+from docx.shared import Cm,Pt,RGBColor
 
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docxtpl import DocxTemplate
@@ -806,7 +807,7 @@ def gerar_relatorio(request, sindicancia_id):
             testemunha_nome_paragraph = doc.add_paragraph()
             testemunha_nome_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
             testemunha_nome_paragraph.paragraph_format.left_indent = Pt(30)
-            testemunha_nome_run = testemunha_nome_paragraph.add_run(f"\u25CF    {testemunha.nome} - fls _____")
+            testemunha_nome_run = testemunha_nome_paragraph.add_run(f"\u25CF    {testemunha.nome} - fls {testemunha.fls}")
             testemunha_nome_run.font.name = 'Times New Roman'
             testemunha_nome_run.font.size = Pt(12)
             r = testemunha_nome_run._element
@@ -817,45 +818,445 @@ def gerar_relatorio(request, sindicancia_id):
         sindicado_nome_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
 
         #sindicado_nome_paragraph.paragraph_format.left_indent = Pt(63)
-        sindicado_nome_run = sindicado_nome_paragraph.add_run(f" O Sindicado, {sindicado.nome.upper()} - {sindicado.posto_sindicado.upper()}, foi inquirido conforme fls:_____")
+        sindicado_nome_run = sindicado_nome_paragraph.add_run(f" O Sindicado, {sindicado.nome.upper()} - {sindicado.posto_sindicado.upper()}, foi inquirido conforme fls: {sindicado.fls}")
         sindicado_nome_run.font.name = 'Times New Roman'
         sindicado_nome_run.font.size = Pt(12)
         r = sindicado_nome_run._element
         r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
 
-        # Adiciona um parágrafo com o texto desejado
-        paragrafo = doc.add_paragraph()
-        run = paragrafo.add_run(
-            f"Este é um texto em itálico e POrtaria nº {sindicancia.numero} e autoridade delegada o {sindicancia.posto_delegada} {sindicancia.delegada}  recfdfdfjdflkdjfkdjflkdjflkdsjfldkfjdlskfjdslkfjdlfjdslfjdlfjdslfjlkjdfjdslfjdslkfjdslkfsdjflkjflksdfjdskfjdlfjkdlfjdskfjdflkjsdfklsdjflsdkfjsdklfjslkuo até o meio da página.")
-        run.italic = True
+    for ofendido in ofendidos:
+        ofendido_nome_paragraph = doc.add_paragraph()
+        ofendido_nome_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+        #sindicado_nome_paragraph.paragraph_format.left_indent = Pt(63)
+        ofendido_nome_run = ofendido_nome_paragraph.add_run(f" O Ofendido, {ofendido.nome.upper()}, foi inquirido conforme fls:{ofendido.fls}")
+        ofendido_nome_run.font.name = 'Times New Roman'
+        ofendido_nome_run.font.size = Pt(12)
+        r = ofendido_nome_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    objetos_apreendidos_paragraph = doc.add_paragraph()
+    objetos_apreendidos_run = objetos_apreendidos_paragraph.add_run(f"Objeto(s) Apreendido(s):")
+    objetos_apreendidos_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    objetos_apreendidos_run.font.name = 'Times New Roman'
+    objetos_apreendidos_run.font.size = Pt(12)
+    r = objetos_apreendidos_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    nao_houveram_paragraph = doc.add_paragraph()
+    nao_houveram_run = nao_houveram_paragraph.add_run(f"\u25CF    Não Houve;")
+    nao_houveram_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    nao_houveram_paragraph.paragraph_format.left_indent = Pt(30)
+    nao_houveram_run.font.name = 'Times New Roman'
+    nao_houveram_run.font.size = Pt(12)
+    r = nao_houveram_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    diligencias_paragraph = doc.add_paragraph()
+    diligencias_run = diligencias_paragraph.add_run(f"Diligências Realizadas:")
+    diligencias_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    diligencias_run.font.name = 'Times New Roman'
+    diligencias_run.font.size = Pt(12)
+    r = diligencias_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(f"\u25CF    Termo de Abertura ; Fls xx;")
+    dili_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    dili_paragraph.paragraph_format.left_indent = Pt(30)
+
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    r = dili_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(f"\u25CF    Ofício de Início dos Trabalhos;  Fls xx;")
+    dili_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    dili_paragraph.paragraph_format.left_indent = Pt(30)
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    r = dili_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    if len(ofendidos)==0:
+        pass
+    else:
+        for ofendido in ofendidos:
+
+            dili_paragraph = doc.add_paragraph()
+            dili_run = dili_paragraph.add_run(f"\u25CF    Termo de Perguntas ao Ofendido {ofendido.nome} Fls {ofendido.fls};")
+            dili_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+            dili_paragraph.paragraph_format.left_indent = Pt(30)
+            dili_run.font.name = 'Times New Roman'
+            dili_run.font.size = Pt(12)
+            r = dili_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    if len(testemunhas)==0:
+        pass
+    else:
+        for testemunha in testemunhas:
+            dili_paragraph = doc.add_paragraph()
+            dili_run = dili_paragraph.add_run(f"\u25CF    Termo de Inquirição de Testemunha {testemunha.nome} Fls {testemunha.fls};")
+            dili_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+            dili_paragraph.paragraph_format.left_indent = Pt(30)
+            dili_run.font.name = 'Times New Roman'
+            dili_run.font.size = Pt(12)
+            r = dili_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    if len(sindicados)==0:
+        pass
+    else:
         for sindicado in sindicados:
-            run = paragrafo.add_run(
-                f"disse o: {sindicado.nome} que {sindicado.declaracao}")
-            run.italic = True
+            dili_paragraph = doc.add_paragraph()
+            dili_run = dili_paragraph.add_run(f"\u25CF    Termo de Perguntas ao Sindicado {sindicado.nome} Fls {sindicado.fls};")
+            dili_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+            dili_paragraph.paragraph_format.left_indent = Pt(30)
+            dili_run.font.name = 'Times New Roman'
+            dili_run.font.size = Pt(12)
+            r = dili_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
 
-    # Define o recuo do parágrafo até o meio da página (assumindo uma largura de página padrão de 21 cm)
-    # Metade da página seria 10.5 cm
-    paragrafo.paragraph_format.left_indent = Cm(8.5)
+    dados_paragraph = doc.add_paragraph()
+    dados_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    run1 = dados_paragraph.add_run("2. ")
+    run2 = dados_paragraph.add_run("Os Fatos")
+    run1.font.name = 'Times New Roman'
+    run1.font.size = Pt(12)
+    run2.font.name = 'Times New Roman'
+    run2.font.size = Pt(12)
+    run2.bold = True
+    run2.underline = True
+    run1.bold = False
 
-    paragrafo = doc.add_paragraph()
-    run = paragrafo.add_run(
-        "Este é um texto em normal e com recfdfdfjdflkdjfkdjflkdjflkdsjfldkfjdlskfjdslkfjdlfjdslfjdlfjdslfjlkjdfjdslfjdslkfjdslkfsdjflkjflksdfjdskfjdlfjkdlfjdskfjdflkjsdfklsdjflsdkfjsdklfjslkuo até o meio da página.")
-    run.italic = False
+    # 2. Os Fatos__________________________________________________________________
 
-    # Define o recuo do parágrafo até o meio da página (assumindo uma largura de página padrão de 21 cm)
-    # Metade da página seria 10.5 cm
-    
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(f"Do que foi apurado na presente sindicância constata-se que os fatos ocorreram da seguinte forma:")
+    dili_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    dili_paragraph.paragraph_format.left_indent = Pt(30)
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    r = dili_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
 
-    # Salva o documento
 
+
+    fato_paragraph = doc.add_paragraph()
+    fato_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    fato_paragraph.paragraph_format.first_line_indent = Pt(40)
+
+    fato_run = fato_paragraph.add_run(f"XXXXXXXXXcitar como ocorreuXXXXXXXXXXXX")
+    fato_run.font.name = 'Times New Roman'
+    fato_run.font.size = Pt(12)
+    fato_run.font.color.rgb = RGBColor(255, 0, 0)  # Define a cor vermelha
+    r = fato_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+#________________________________ comentar fatos apurados_________________
+    dados_paragraph = doc.add_paragraph()
+    dados_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    run1 = dados_paragraph.add_run("3. ")
+    run2 = dados_paragraph.add_run("Análise dos Elementos Informativos")
+    run1.font.name = 'Times New Roman'
+    run1.font.size = Pt(12)
+    run2.font.name = 'Times New Roman'
+    run2.font.size = Pt(12)
+    run2.bold = True
+    run2.underline = True
+    run1.bold = False
+    # 3.	Análise dos Elementos Informativos__________________________________________________________________
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(f"Diante da tentativa de esclarecer o evento, há necessidade de comentar, um a um, os depoimentos:")
+    dili_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    dili_paragraph.paragraph_format.left_indent = Pt(30)
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    r = dili_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    if len(ofendidos)==0:
+        pass
+    else:
+        for ofendido in ofendidos:
+            dili_paragraph = doc.add_paragraph()
+            dili_run = dili_paragraph.add_run(f'\u25CF Diz o Ofendido, {ofendido.nome} Conforme Fls {ofendido.fls}')
+            dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            dili_paragraph.paragraph_format.left_indent = Pt(70)
+            dili_run.font.name = 'Times New Roman'
+            dili_run.font.size = Pt(12)
+            r = dili_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+            dili_run2 = dili_paragraph.add_run(f' "{ofendido.declaracao}"')
+            dili_run2.font.name = 'Times New Roman'
+            dili_run2.font.size = Pt(12)
+            dili_run2.italic = True
+            r2 = dili_run2._element
+            r2.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+            dili_run2 = dili_paragraph.add_run('. Verificamos na declaração que xxxxxcomentário do encarregadoxxxxxx.')
+            dili_run2.font.name = 'Times New Roman'
+            dili_run2.font.size = Pt(12)
+            dili_run2.font.color.rgb = RGBColor(255, 0, 0)  # Define a cor vermelha
+            dili_run2.italic = False
+            r2 = dili_run2._element
+            r2.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+
+    if len(testemunhas)==0:
+        pass
+    else:
+        for testemunha in testemunhas:
+            dili_paragraph = doc.add_paragraph()
+            dili_run = dili_paragraph.add_run(f'\u25CF Diz a Testemunha, {testemunha.nome} Conforme Fls {testemunha.fls}')
+            dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            dili_paragraph.paragraph_format.left_indent = Pt(70)
+            dili_run.font.name = 'Times New Roman'
+            dili_run.font.size = Pt(12)
+            r = dili_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+            dili_run2 = dili_paragraph.add_run(f' "{testemunha.declaracao}"')
+            dili_run2.font.name = 'Times New Roman'
+            dili_run2.font.size = Pt(12)
+            dili_run2.italic = True
+            r2 = dili_run2._element
+            r2.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+            dili_run2 = dili_paragraph.add_run('. Verificamos na declaração que xxxxxcomentário do encarregadoxxxxxx.')
+            dili_run2.font.name = 'Times New Roman'
+            dili_run2.font.size = Pt(12)
+            dili_run2.font.color.rgb = RGBColor(255, 0, 0)  # Define a cor vermelha
+            dili_run2.italic = False
+            r2 = dili_run2._element
+            r2.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    if len(sindicados)==0:
+        pass
+    else:
+        for sindicado in sindicados:
+            dili_paragraph = doc.add_paragraph()
+            dili_run = dili_paragraph.add_run(f'\u25CF Diz o Sindicado, {sindicado.nome} Conforme Fls {sindicado.fls}')
+            dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+            dili_paragraph.paragraph_format.left_indent = Pt(70)
+            dili_run.font.name = 'Times New Roman'
+            dili_run.font.size = Pt(12)
+            r = dili_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+            dili_run2 = dili_paragraph.add_run(f' "{sindicado.declaracao}"')
+            dili_run2.font.name = 'Times New Roman'
+            dili_run2.font.size = Pt(12)
+            dili_run2.italic = True
+            r2 = dili_run2._element
+            r2.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+            dili_run2 = dili_paragraph.add_run('. Verificamos na declaração que xxxxxcomentário do encarregadoxxxxxx.')
+            dili_run2.font.name = 'Times New Roman'
+            dili_run2.font.size = Pt(12)
+            dili_run2.font.color.rgb = RGBColor(255, 0, 0)  # Define a cor vermelha
+            dili_run2.italic = False
+            r2 = dili_run2._element
+            r2.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+# declaração e  comentario de cada envolvido cadastrado__________________________
+
+    dados_paragraph = doc.add_paragraph()
+    dados_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    run1 = dados_paragraph.add_run("4. ")
+    run2 = dados_paragraph.add_run("Da análise da defesa")
+    run1.font.name = 'Times New Roman'
+    run1.font.size = Pt(12)
+    run2.font.name = 'Times New Roman'
+    run2.font.size = Pt(12)
+    run2.bold = True
+    run2.underline = True
+    run1.bold = False
+
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(f" ###EXEMPLO APAGAR######### A defesa relata que ")
+    dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    dili_paragraph.paragraph_format.first_line_indent = Pt(30)
+
+    #dili_paragraph.paragraph_format.left_indent = Pt(30)
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    dili_run.font.color.rgb = RGBColor(255, 0, 0)  # Define a cor vermelha
+    r = dili_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    dili_run2 = dili_paragraph.add_run(f' "houve inobservância a formalidades essenciais a regularidade do feito e sua ausência atenta contra o exercício da ampla defesa e o contraditório do Sindicado, pois a defesa diz que como teria ocasionado lesões físicas ao ofendido, entretanto não fora juntada nos autos o corpo de delito, conforme diz o  art. 328 do CPPM."')
+    dili_run2.font.name = 'Times New Roman'
+    dili_run2.font.size = Pt(12)
+    dili_run2.font.color.rgb = RGBColor(0, 0, 255)  # Define a cor AZUL
+    dili_run2.italic = True
+    r2 = dili_run2._element
+    r2.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    dili_run2 = dili_paragraph.add_run(' No entanto o referido exame não foi produzido pela vítima tendo em vista que a mesma sequer fez a confecção de boletim de ocorrências, assim não foi possível realizar a juntada do exame de corpo de delito. E o objetivo do procedimento administrativo é verificar possíveis transgressões disciplinar cometida durante a abordagem.')
+    dili_run2.font.name = 'Times New Roman'
+    dili_run2.font.size = Pt(12)
+    dili_run2.font.color.rgb = RGBColor(255, 0, 0)  # Define a cor vermelha
+    dili_run2.italic = False
+    r2 = dili_run2._element
+    r2.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+
+    # 4 analise da defesa__________________________________________________________________
+
+    dados_paragraph = doc.add_paragraph()
+    dados_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    #dados_paragraph.paragraph_format.first_line_indent = Pt(30)
+    run1 = dados_paragraph.add_run("5. ")
+    run2 = dados_paragraph.add_run("Solução")
+    run1.font.name = 'Times New Roman'
+    run1.font.size = Pt(12)
+    run2.font.name = 'Times New Roman'
+    run2.font.size = Pt(12)
+    run2.bold = True
+    run2.underline = True
+    run1.bold = False
+
+# 5 Solução__________________________________________________________________
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(
+        f"Diante do exposto, após análise minuciosa dos autos, concluímos os trabalhos desta sindicância, de forma a perceber que:")
+    dili_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    dili_paragraph.paragraph_format.left_indent = Pt(30)
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    r = dili_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    fato_paragraph = doc.add_paragraph()
+    fato_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    fato_paragraph.paragraph_format.first_line_indent = Pt(40)
+
+    fato_run = fato_paragraph.add_run(f"XXXXXXXXXcitar como ocorreuXXXXXXXXXXXX")
+    fato_run.font.name = 'Times New Roman'
+    fato_run.font.size = Pt(12)
+    fato_run.font.color.rgb = RGBColor(255, 0, 0)  # Define a cor vermelha
+    r = fato_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+
+    texto='Diante do que foi apurado, este Sindicante encontrou indícios de transgressões disciplinares com relação ao tapa desferido durante a abordagem que não condiz que o que preceitua o Manual de Procedimento Operacional Padrão da Polícia Militar do Estado de Mato Grosso (POP PMMT), pois apesar de a vítima não realizar a confecção do Boletim de Ocorrência o vídeo deixa clara a dinâmica da abordagem que culminou com o golpe na cabeça do Ofendido. Sobre a questão  de injuria racial/racismo, nada consta no  vídeo apresentado, citado pelo ofendido e pela testemunha que gravou o vídeo e  negado veemente por todos os policiais inquiridos.'
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(
+        f"{texto}")
+    dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    dili_paragraph.paragraph_format.first_line_indent = Pt(30)
+
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    dili_run.font.color.rgb = RGBColor(255, 0, 0)  # Define a cor vermelha
+    r = dili_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    if len(sindicados)==1:
+
+
+        texto='Portanto salvo melhor juízo, há indícios de transgressão disciplinar; porém não de crime militar a ser imputado ao Sindicado:'
+        sindicados_texto = ' '.join([f"{s.nome} - {s.posto_sindicado} RGPMMT {s.rgpm};" for s in sindicados])
+        dili_paragraph = doc.add_paragraph()
+        dili_run = dili_paragraph.add_run(f"{texto} {sindicados_texto}")
+
+        dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        dili_paragraph.paragraph_format.first_line_indent = Pt(30)
+
+        dili_run.font.name = 'Times New Roman'
+        dili_run.font.size = Pt(12)
+        dili_run.font.color.rgb = RGBColor(255, 0, 0)  # Define a cor vermelha
+        r = dili_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+    else:
+        texto = 'Portanto salvo melhor juízo, há indícios de transgressão disciplinar; porém não de crime militar a serem imputados aos Sindicados:'
+        sindicados_texto = ' '.join([f"{s.nome} - {s.posto_sindicado} RGPMMT {s.rgpm};" for s in sindicados])
+        dili_paragraph = doc.add_paragraph()
+        dili_run = dili_paragraph.add_run(f"{texto} {sindicados_texto}")
+
+        dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        dili_paragraph.paragraph_format.first_line_indent = Pt(30)
+
+        dili_run.font.name = 'Times New Roman'
+        dili_run.font.size = Pt(12)
+        dili_run.font.color.rgb = RGBColor(255, 0, 0)  # Define a cor vermelha
+        r = dili_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+#___________________________relatório gerado ___________________________________________________________
+
+    import locale
+
+    # Definir a localidade para português do Brasil
+    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+
+    # Obter a data atual
+    data_atual = datetime.now()
+
+    # Formatar a data no formato desejado
+    data_formatada = data_atual.strftime('%d de %B de %Y')
+
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run('')
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(
+        f"Quartel do {usuario.unidade} de {usuario.cidade} {data_formatada}.")
+    dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    dili_paragraph.paragraph_format.first_line_indent = Pt(40)
+
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    #dili_run.font.color.rgb = RGBColor(255, 0, 0)  # Define a cor vermelha
+    r = dili_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+
+    tamanho= len(usuario.nome_completo)+len(usuario.posto)+6
+
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run('')
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run('_'*tamanho)
+    dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    dili_paragraph.paragraph_format.space_before = Pt(0)
+    dili_paragraph.paragraph_format.space_after = Pt(1)
+    dili_paragraph.paragraph_format.line_spacing = Pt(12)
+
+
+
+
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(f'{usuario.nome_completo} - {usuario.posto}')
+    dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    dili_paragraph.paragraph_format.space_before = Pt(0)
+    dili_paragraph.paragraph_format.space_after = Pt(1)
+    dili_paragraph.paragraph_format.line_spacing = Pt(12)
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(f'RGPPM {usuario.rgpm} - Sindicante')
+    dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+
+
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    # dili_run.font.color.rgb = RGBColor(255, 0, 0)  # Define a cor vermelha
+    r = dili_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
 
 
     # Nome do arquivo
-    nome = 'foisim'
+    nome = f'Relatorio sind{sindicancia.numero}'
 
     # Configurar a resposta HTTP para download do arquivo
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = f'attachment; filename="relatorio_{nome}.docx"'
+    response['Content-Disposition'] = f'attachment; filename="{nome}.docx"'
 
     # Salvar o documento modificado na resposta
     try:
@@ -864,6 +1265,9 @@ def gerar_relatorio(request, sindicancia_id):
         return HttpResponse(f"Erro ao salvar o documento: {e}", status=500)
 
     return response
+
+
+
 
 @login_required(login_url='/')
 def cadastrar_sindicado(request, sindicancia_id):
@@ -980,3 +1384,348 @@ def excluir_ofendido(request, sindicancia_id, id):
         ofendido.delete()
         return redirect('inicio:detalhes_sindicancia', sindicancia_id=sindicancia_id)
     return render(request, 'sindicancias_cadastradas.html', {'ofendido': ofendido})
+
+@login_required(login_url='/')
+def gerar_remessa_dos_autos(request, sindicancia_id):
+    sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
+
+    sindicados = Sindicado.objects.filter(portaria_id=sindicancia_id)
+    ofendidos = Ofendido.objects.filter(portaria_id=sindicancia_id)
+    usuario = request.user
+    testemunhas = Testemunha.objects.filter(portaria_id=sindicancia_id)
+
+
+
+
+    template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'relatorio_modelo.docx')
+    # Criar um novo documento
+    doc = Document(template_path)
+
+    cabecalho(doc,usuario)
+
+    char_style = doc.styles.add_style('CustomCharStyle', WD_STYLE_TYPE.CHARACTER)
+    char_style.font.name = 'Times New Roman'
+    char_style.font.size = Pt(12)
+    char_style.font.color.rgb = RGBColor(0, 0, 0)  # Define a cor preta
+    r = char_style.element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    # Parágrafo 1
+    datata = datetime.today()
+    dia = f"{datata.day:02d}"
+    mes = datata.month
+    ano = datata.year
+
+    paragraph1 = doc.add_paragraph()
+    paragraph1 = doc.add_paragraph('')
+    paragraph1.paragraph_format.space_before = Pt(15)
+    run1 = paragraph1.add_run(f'Ofício nº. 007/SIND/7ºCR/2024	       {usuario.cidade}, {dia} de {mes_escrito(mes)} de {ano}.')
+    run1.style = 'CustomCharStyle'
+    paragraph1.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+    paragraph1 = doc.add_paragraph()
+    paragraph1 = doc.add_paragraph('')
+    run1 = paragraph1.add_run('Ao Senhor Ten Cel PM João das Dores.')
+    run1.style = 'CustomCharStyle'
+    paragraph1.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    paragraph1.paragraph_format.space_before = Pt(0)
+    paragraph1.paragraph_format.space_after = Pt(0)
+
+    paragraph1 = doc.add_paragraph()
+    run1 = paragraph1.add_run(f'{sindicancia.funcao_delegante}.')
+    run1.style = 'CustomCharStyle'
+    paragraph1.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    paragraph1.paragraph_format.space_before = Pt(0)
+    paragraph1.paragraph_format.space_after = Pt(0)
+
+    paragraph1 = doc.add_paragraph()
+    run1 = paragraph1.add_run('Assunto: Remessa de Sindicância.')
+    run1.style = 'CustomCharStyle'
+    paragraph1.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    paragraph1.paragraph_format.space_before = Pt(0)
+    paragraph1.paragraph_format.space_after = Pt(0)
+
+    paragraph1 = doc.add_paragraph()
+    data_original = f'{sindicancia.data_portaria}'
+
+    # Converter a string para um objeto datetime
+    data_obj = datetime.strptime(data_original, '%Y-%m-%d')
+    # Formatar a data no novo formato
+    data_formatada = data_obj.strftime('%d.%m.%y')
+    run1 = paragraph1.add_run(f'Ref: Portaria nº{sindicancia.numero}, datada de {data_formatada}.')
+    run1.style = 'CustomCharStyle'
+    paragraph1.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    paragraph1.paragraph_format.space_before = Pt(0)
+    paragraph1.paragraph_format.space_after = Pt(0)
+
+    paragraph1 = doc.add_paragraph()
+    paragraph1 = doc.add_paragraph('')
+    paragraph1.paragraph_format.first_line_indent = Pt(120)
+    run1 = paragraph1.add_run('Senhor Comandante,')
+    run1.style = 'CustomCharStyle'
+    paragraph1.paragraph_format.space_before = Pt(15)
+    paragraph1.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+    if len(sindicados) == 1:
+
+        datata= sindicancia.data_portaria
+        dia = datata.day
+        mes = datata.month
+        ano = datata.year
+
+
+        texto = f'Tendo este Sindicante sido designado por Vossa Senhoria, e por motivo ter  finalizado os trabalhos referentes à Sindicância, instaurada pela Portaria nº {sindicancia.numero}  de {dia} de {mes_escrito(mes)} de {ano}, qual figura como Sindicado o'
+        texto1 = 'estão conclusos  remeto a V.S.ª estes autos com xxxxxxxxxxxxxxxx folhas, para fins de Solução.'
+        sindicados_texto = ' '.join([f" {s.posto_sindicado} {s.nome}, RG {s.rgpm} PMMT," for s in sindicados])
+        dili_paragraph = doc.add_paragraph()
+        dili_run = dili_paragraph.add_run(f"{texto} {sindicados_texto} {texto1}")
+
+        dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        dili_paragraph.paragraph_format.first_line_indent = Pt(30)
+
+        dili_run.font.name = 'Times New Roman'
+        dili_run.font.size = Pt(12)
+        dili_run.font.color.rgb = RGBColor(0, 0, 0)  # Define a corpreto
+        r = dili_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+    else:
+        datata = sindicancia.data_portaria
+        dia = f"{datata.day:02d}"
+        mes = datata.month
+        ano = datata.year
+
+        texto = f'Tendo este Sindicante sido designado por Vossa Senhoria, e por motivo ter  finalizado os trabalhos referentes à Sindicância, instaurada pela Portaria nº {sindicancia.numero}  de {dia} de {mes_escrito(mes)} de {ano}, qual figuram como Sindicados o'
+        texto1='estão conclusos  remeto a V.S.ª estes autos com xxxxxxxxxxxxxxxx folhas, para fins de Solução.'
+        sindicados_texto = ' '.join([f" {s.posto_sindicado} {s.nome}, RG {s.rgpm} PMMT," for s in sindicados])
+        dili_paragraph = doc.add_paragraph()
+        dili_run = dili_paragraph.add_run(f"{texto} {sindicados_texto} {texto1}")
+
+        dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        dili_paragraph.paragraph_format.first_line_indent = Pt(30)
+
+        dili_run.font.name = 'Times New Roman'
+        dili_run.font.size = Pt(12)
+        dili_run.font.color.rgb = RGBColor(0, 0, 0)  # Define a cor preto
+        r = dili_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+
+
+
+
+    nome_sindicante(doc,usuario,'Respeitosamente')
+
+
+    rodape(doc=doc)
+    nome = f'remessa sind{sindicancia.numero}'
+
+
+
+    return gera_word(doc,nome)
+
+# remessa dos autos ______________________________________________________________________
+
+@login_required(login_url='/')
+def gerar_Oficio_padrao(request, sindicancia_id):
+    sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
+
+    sindicados = Sindicado.objects.filter(portaria_id=sindicancia_id)
+    ofendidos = Ofendido.objects.filter(portaria_id=sindicancia_id)
+    usuario = request.user
+    testemunhas = Testemunha.objects.filter(portaria_id=sindicancia_id)
+    template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'relatorio_modelo.docx')
+    # Criar um novo documento
+    doc = Document(template_path)
+
+    cabecalho(doc,usuario)
+
+    criar_paragrafo(doc, '')
+    criar_paragrafo(doc, '')
+
+    data_original = f'{sindicancia.data_portaria}'
+
+    # Converter a string para um objeto datetime
+    data_obj = datetime.strptime(data_original, '%Y-%m-%d')
+    # Formatar a data no novo formato
+    data_formatada = data_obj.strftime('%d.%m.%y')
+    dia_inquiricao='13/05/2024'
+    dia_semana ='sexta-feira'
+    hora_inquiricao='13h00min'
+    condicao='Ofendido'
+
+    assunto='Solicitação (FAZ)'
+    nome_notificado='Pedro Coala da Silva Perira'
+    cargoouendereco='Rua augusta , Cidade: Jaciara MT'
+    texto_solicitacao=f'Notifico Vossa Senhoria a comparecer no {usuario.unidade}, {usuario.rua}, nº {usuario.numero},Bairro: {usuario.bairro},Cidade: {usuario.cidade}, no dia {dia_inquiricao} ({dia_semana}) às {hora_inquiricao}, fins de prestar esclarecimentos como {condicao} na Sindicância  Portaria nº {sindicancia.numero}, de {data_formatada}, em referência a fim de ser inquirido sobre os fatos narrados na portaria. Dúvidas entrar em contato por meio do telefone: {usuario.telefone} {usuario.posto} {usuario.nome_completo}.'
+
+
+    criar_paragrafo(doc,f'{nome_notificado}/ {cargoouendereco}')
+    criar_paragrafo(doc,f'Ref: Portaria nº{sindicancia.numero}, datada de {data_formatada}.')
+    criar_paragrafo(doc, f'Assunto: {assunto}')
+    criar_paragrafo(doc,'')
+    criar_paragrafo(doc, '')
+    criar_paragrafo(doc,f"{texto_solicitacao}",lado='justificado')
+    criar_paragrafo(doc,'')
+    criar_paragrafo(doc, '')
+
+    nome_sindicante(doc,usuario,'Atenciosamente')
+
+    rodape(doc,usuario)
+
+    return gera_word(doc,nome=f'oficio_teste{sindicancia.numero}')
+
+
+
+
+#______________________funções para construção____________________________________________________________
+def criar_paragrafo(doc,texto,antes=1,depois=1,lado=0):
+
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(f'{texto}')
+    if lado=='centro':
+        dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        dili_run.font.name = 'Times New Roman'
+        dili_run.font.size = Pt(12)
+        dili_paragraph.paragraph_format.space_before = Pt(antes)
+        dili_paragraph.paragraph_format.space_after = Pt(depois)
+        #dili_paragraph.paragraph_format.line_spacing = Pt(12)
+
+    elif lado =='justificado':
+        dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        dili_paragraph.paragraph_format.first_line_indent = Pt(40)
+        dili_run.font.name = 'Times New Roman'
+        dili_run.font.size = Pt(12)
+        dili_paragraph.paragraph_format.space_before = Pt(antes)
+        dili_paragraph.paragraph_format.space_after = Pt(depois)
+        # dili_paragraph.paragraph_format.line_spacing = Pt(12)
+
+    else:
+        dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        dili_run.font.name = 'Times New Roman'
+        dili_run.font.size = Pt(12)
+        dili_paragraph.paragraph_format.space_before = Pt(antes)
+        dili_paragraph.paragraph_format.space_after = Pt(depois)
+        # dili_paragraph.paragraph_format.line_spacing = Pt(12)
+
+def cabecalho(doc,usuario):
+    cr = usuario.cr.upper()
+    unidade = usuario.unidade.upper()
+
+    header_texts = [
+        "POLÍCIA MILITAR DO ESTADO DE MATO GROSSO",
+        f"{cr}",
+        f"{unidade}"
+    ]
+    for text in header_texts:
+        paragraph = doc.add_paragraph(text)
+        paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        run = paragraph.runs[0]
+        run.font.name = 'Times New Roman'
+        run.font.size = Pt(12)
+        r = run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+        paragraph_format = paragraph.paragraph_format
+        paragraph_format.space_after = Pt(0)
+        paragraph_format.space_before = Pt(0)
+
+    # ____________________titulo cabeçalho___________________________________________________
+def nome_sindicante(doc,usuario,tratamento):
+    paragraph1 = doc.add_paragraph()
+
+
+    paragraph1.paragraph_format.first_line_indent = Pt(120)
+    run1 = paragraph1.add_run(f'{tratamento},')
+
+
+    paragraph1.paragraph_format.space_before = Pt(15)
+    paragraph1.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    run1.font.name = 'Times New Roman'
+    run1.font.size = Pt(12)
+    paragraph1.paragraph_format.space_before = Pt(0)
+    paragraph1.paragraph_format.space_after = Pt(20)
+    paragraph1.paragraph_format.line_spacing = Pt(18)
+
+    tamanho = len(usuario.nome_completo) + len(usuario.posto) + 6
+
+    dili_paragraph = doc.add_paragraph()
+
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run('_' * tamanho)
+    dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    dili_paragraph.paragraph_format.space_before = Pt(0)
+    dili_paragraph.paragraph_format.space_after = Pt(1)
+    dili_paragraph.paragraph_format.line_spacing = Pt(12)
+
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(f'{usuario.nome_completo} - {usuario.posto}')
+    dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    dili_paragraph.paragraph_format.space_before = Pt(0)
+    dili_paragraph.paragraph_format.space_after = Pt(1)
+    dili_paragraph.paragraph_format.line_spacing = Pt(12)
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(f'RGPPM {usuario.rgpm} - Sindicante')
+    dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+def rodape(doc,usuario):
+
+    section = doc.sections[0]
+    footer = section.footer
+    footer_paragraph = footer.add_paragraph()
+    footer_run = footer_paragraph.add_run("________________________________________________________________________")
+    footer_run.font.name = 'Times New Roman'
+    footer_run.font.size = Pt(12)
+    footer_run.font.color.rgb = RGBColor(0, 0, 0)  # Cor preta
+    footer_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    footer_paragraph.paragraph_format.space_before = Pt(0)
+    footer_paragraph.paragraph_format.space_after = Pt(0)
+
+    footer_paragraph = footer.add_paragraph()
+    footer_run = footer_paragraph.add_run(f"{usuario.rua}, nº {usuario.numero}, Bairro: {usuario.bairro}, Cidade: {usuario.cidade}")
+    footer_run.font.name = 'Times New Roman'
+    footer_run.font.size = Pt(12)
+    footer_run.font.color.rgb = RGBColor(0, 0, 0)  # Cor preta
+    footer_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    footer_paragraph.paragraph_format.space_before = Pt(0)
+    footer_paragraph.paragraph_format.space_after = Pt(0)
+
+    footer_paragraph = footer.add_paragraph()
+    footer_run = footer_paragraph.add_run(f"Cep {usuario.cep} - Telefone: {usuario.telefone}")
+    footer_run.font.name = 'Times New Roman'
+    footer_run.font.size = Pt(12)
+    footer_run.font.color.rgb = RGBColor(0, 0, 0)  # Cor preta
+    footer_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    footer_paragraph.paragraph_format.space_before = Pt(0)
+    footer_paragraph.paragraph_format.space_after = Pt(0)
+
+    footer_paragraph = footer.add_paragraph()
+    footer_run = footer_paragraph.add_run(f"e-mail: {usuario.email}")
+    footer_run.font.name = 'Times New Roman'
+    footer_run.font.size = Pt(12)
+    footer_run.font.color.rgb = RGBColor(0, 0, 0)  # Cor preta
+    footer_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    footer_paragraph.paragraph_format.space_before = Pt(0)
+    footer_paragraph.paragraph_format.space_after = Pt(0)
+
+def gera_word(doc,nome):
+
+
+
+    # Configurar a resposta HTTP para download do arquivo
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    response['Content-Disposition'] = f'attachment; filename="relatorio_{nome}.docx"'
+
+    # Salvar o documento modificado na resposta
+    try:
+        doc.save(response)
+    except Exception as e:
+        return HttpResponse(f"Erro ao salvar o documento: {e}", status=500)
+
+    return response
+
+

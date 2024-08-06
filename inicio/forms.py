@@ -7,7 +7,7 @@ class SindicadoForm(forms.ModelForm):
         model = Sindicado
         fields = ['nome', 'rgpm', 'cpf', 'email', 'endereco', 'posto_sindicado',
                   'pai', 'mae', 'telefone', 'data_nascimento', 'data_inquiricao',
-                  'naturalidade', 'declaracao', 'lotacao', 'hora_inicio', 'hora_fim']
+                  'naturalidade', 'declaracao', 'lotacao', 'hora_inicio', 'hora_fim','fls']
 
         widgets = {
             'data_nascimento': forms.DateInput(attrs={'type': 'date'}),
@@ -25,7 +25,7 @@ class TestemunhaForm(forms.ModelForm):
         model = Testemunha
         fields = ['nome', 'rgpm', 'cpf', 'email', 'endereco',
                   'pai', 'mae', 'telefone', 'data_nascimento', 'data_inquiricao',
-                  'naturalidade', 'declaracao', 'profissao', 'hora_inicio', 'hora_fim']
+                  'naturalidade', 'declaracao', 'profissao', 'hora_inicio', 'hora_fim','fls']
 
         widgets = {
             'data_nascimento': forms.DateInput(attrs={'type': 'date'}),
@@ -43,7 +43,7 @@ class OfendidoForm(forms.ModelForm):
         model = Ofendido
         fields = ['nome', 'rgpm', 'cpf', 'email', 'endereco',
                   'pai', 'mae', 'telefone', 'data_nascimento', 'data_inquiricao',
-                  'naturalidade', 'declaracao', 'profissao', 'hora_inicio', 'hora_fim']
+                  'naturalidade', 'declaracao', 'profissao', 'hora_inicio', 'hora_fim','fls']
 
         widgets = {
             'data_nascimento': forms.DateInput(attrs={'type': 'date'}),
