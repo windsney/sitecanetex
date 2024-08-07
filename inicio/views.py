@@ -353,7 +353,7 @@ def gerar_declaracao_sindicado(request,sindicancia_id,id):
     documento.render(context)
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = f'attachment; filename= declaração {nome_sindicado}.docx'
+    response['Content-Disposition'] = f'attachment; filename= Sindicado {nome_sindicado}.docx'
     documento.save(response)
 
     return response
@@ -363,8 +363,13 @@ def gerar_declaracao_sindicado(request,sindicancia_id,id):
 def gerar_declaracao_testemunha(request,sindicancia_id,id):
     testemunha = get_object_or_404(Testemunha, id=id)
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
-    template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'declaracao_testemunha.docx')
+    if testemunha.militar=='sim':
+        template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'declaracao_testemunha_militar.docx')
 
+    else:
+
+        template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'declaracao_testemunha.docx')
+    usuario = request.user
 
 
 
@@ -422,17 +427,17 @@ def gerar_declaracao_testemunha(request,sindicancia_id,id):
 
     naturalidade=testemunha.naturalidade
 
-    cr= sindicancia.unidade.upper()
+    cr= usuario.cr.upper()
 
-    lotacao_delegada= sindicancia.lotacao_delegada
-    lotacao_delegada1 = sindicancia.lotacao_delegada.upper()
-    rua_quartel=sindicancia.rua_quartel
-    numero_quartel=sindicancia.numero_quartel
-    bairro_quartel=sindicancia.bairro_quartel
-    cidade_quartel=sindicancia.cidade_quartel
-    cep_quartel=sindicancia.cep_quartel
-    telefone_quartel=sindicancia.telefone_quartel
-    email_quartel=sindicancia.email_quartel
+    lotacao_delegada= usuario.unidade
+    lotacao_delegada1 = usuario.unidade.upper()
+    rua_quartel=usuario.rua
+    numero_quartel=usuario.numero
+    bairro_quartel=usuario.bairro
+    cidade_quartel=usuario.cidade
+    cep_quartel=usuario.cep
+    telefone_quartel=usuario.telefone
+    email_quartel=usuario.email_bpm
 
 
     context = {  # VARIÁ
@@ -473,7 +478,7 @@ def gerar_declaracao_testemunha(request,sindicancia_id,id):
     documento.render(context)
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = f'attachment; filename= declaração {nome_sindicado}.docx'
+    response['Content-Disposition'] = f'attachment; filename= Testemunha {nome_sindicado}.docx'
     documento.save(response)
 
     return response
@@ -582,7 +587,7 @@ def gerar_declaracao_ofendido(request, sindicancia_id, id):
     documento.render(context)
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = f'attachment; filename= declaração {nome_sindicado}.docx'
+    response['Content-Disposition'] = f'attachment; filename= Ofendido {nome_sindicado}.docx'
     documento.save(response)
 
     return response

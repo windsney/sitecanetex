@@ -7,7 +7,7 @@ class SindicadoForm(forms.ModelForm):
         model = Sindicado
         fields = ['nome', 'rgpm', 'cpf', 'email', 'endereco', 'posto_sindicado',
                   'pai', 'mae', 'telefone', 'data_nascimento', 'data_inquiricao',
-                  'naturalidade', 'declaracao', 'lotacao', 'hora_inicio', 'hora_fim','fls']
+                  'naturalidade', 'declaracao', 'lotacao', 'hora_inicio', 'hora_fim','fls',]
 
         widgets = {
             'data_nascimento': forms.DateInput(attrs={'type': 'date'}),
@@ -21,15 +21,35 @@ class SindicadoForm(forms.ModelForm):
                 self.initial[field] = self.initial[field].strftime('%Y-%m-%d')
 
 class TestemunhaForm(forms.ModelForm):
+    MILITAR_CHOICES = [
+        ('sim', 'Sim'),
+        ('nao', 'Não'),
+    ]
+
+   
+
+
+    militar = forms.ChoiceField(
+        choices=MILITAR_CHOICES,
+        widget=forms.RadioSelect,
+        label="A testemunha é Militar?"  # Defina o rótulo aqui
+    )
+
+
+
+
+
     class Meta:
         model = Testemunha
         fields = ['nome', 'rgpm', 'cpf', 'email', 'endereco',
                   'pai', 'mae', 'telefone', 'data_nascimento', 'data_inquiricao',
-                  'naturalidade', 'declaracao', 'profissao', 'hora_inicio', 'hora_fim','fls']
+                  'naturalidade', 'declaracao', 'profissao', 'hora_inicio', 'hora_fim','fls','militar','graduacao',
+                  ]
 
         widgets = {
             'data_nascimento': forms.DateInput(attrs={'type': 'date'}),
             'data_inquiricao': forms.DateInput(attrs={'type': 'date'}),
+
         }
 
     def __init__(self, *args, **kwargs):
@@ -92,7 +112,7 @@ class SindicanciaForm(forms.ModelForm):
 class UsuarioForm(UserCreationForm):
     class Meta:
         model = Usuario
-        fields = ['nome_completo','cr','unidade','posto','rgpm','username', 'password1', 'password2','rua','numero','bairro','cidade','cep','email','telefone']
+        fields = ['nome_completo','cr','unidade','posto','rgpm','username', 'password1', 'password2','rua','numero','bairro','cidade','cep','email_bpm','telefone']
 
         widgets = {
             'nome_completo': forms.TextInput(attrs={'placeholder': 'Nome Completo'}),
@@ -108,8 +128,10 @@ class UsuarioForm(UserCreationForm):
             'bairro': forms.TextInput(attrs={'placeholder': 'Bairro da sua UPM'}),
             'cidade': forms.TextInput(attrs={'placeholder': 'Cidade-UF da sua UPM'}),
             'cep': forms.TextInput(attrs={'placeholder': 'CEP da sua UPM'}),
-            'email': forms.EmailInput(attrs={'placeholder': 'Email da sua UPM'}),
+            'email_bpm': forms.EmailInput(attrs={'placeholder': 'Email da sua UPM'}),
             'telefone': forms.TextInput(attrs={'placeholder': 'Telefone da sua UPM'}),
+
+
         }
         labels = {
             'cr': 'Comando Regional/Diretoria',

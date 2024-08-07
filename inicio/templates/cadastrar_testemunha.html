@@ -49,16 +49,83 @@
         input[type="submit"]:hover {
             background-color: #6A0DAD;
         }
+        .hidden {
+            display: none;
+        }
+        .radio-group {
+            margin-bottom: 20px;
+            margin-top: 10px; /* Ajuste a margem superior aqui */
+        }
+        .radio-group label {
+            margin-right: 10px;
+            margin-bottom: 0;
+        }
+        .radio-group input {
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Cadastrar Testemunha para Sindicância: {{ sindicancia.numero }}</h2>
+
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+            {{ form.non_field_errors }}
+
+            <!-- Renderize o formulário como parágrafos, exceto o campo graduação -->
+            {% for field in form %}
+                {% if field.name != 'graduacao' %}
+                    <p>{{ field.label_tag }}<br>{{ field }}</p>
+                {% endif %}
+            {% endfor %}
+
+            <!-- Campo Graduação -->
+            <div id="graduacao-field" class="hidden">
+                <label for="id_graduacao">Graduação:</label>
+                <select name="graduacao" id="id_graduacao">
+                    <option value="">---------</option>
+                    <option value="Sd PM">Sd PM</option>
+                    <option value="Cb PM">Cb PM</option>
+                    <option value="3Sgt PM">3º Sgt PM</option>
+                    <option value="2Sgt PM">2º Sgt PM</option>
+                    <option value="1Sgt PM">1º Sgt PM</option>
+                    <option value="Sub Ten PM">Sub Ten PM</option>
+                    <option value="Asp Of PM">Asp Of PM</option>
+                    <option value="2ºTen PM">2º Ten PM</option>
+                    <option value="1Ten PM">1º Ten PM</option>
+                    <option value="Cap PM">Cap PM</option>
+                    <option value="Maj PM">Maj PM</option>
+                    <option value="Ten Cel PM">Ten Cel PM</option>
+                    <option value="Cel PM">Cel PM</option>
+                </select>
+            </div>
+
             <input type="submit" value="Cadastrar">
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var militarRadios = document.querySelectorAll('input[name="militar"]');
+            var graduacaoField = document.getElementById('graduacao-field');
+
+            function toggleGraduacaoField() {
+                var selectedValue = document.querySelector('input[name="militar"]:checked');
+                if (selectedValue && selectedValue.value === 'sim') {
+                    graduacaoField.classList.remove('hidden');
+                } else {
+                    graduacaoField.classList.add('hidden');
+                }
+            }
+
+            militarRadios.forEach(function(radio) {
+                radio.addEventListener('change', toggleGraduacaoField);
+            });
+
+            // Inicializa a visibilidade do campo com base na seleção atual
+            toggleGraduacaoField();
+        });
+    </script>
 </body>
 </html>

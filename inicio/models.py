@@ -86,6 +86,8 @@ class Testemunha (models.Model):
     hora_inicio=models.CharField(max_length=50,default=0)
     hora_fim=models.CharField(max_length=50,default=0)
     fls=models.CharField(max_length=50, default=0)
+    militar = models.CharField(max_length=3, choices=[('sim', 'Sim'), ('nao', 'Não')])
+    graduacao = models.CharField(max_length=50, default=0)
 
     def __str__(self):
         return self.nome
