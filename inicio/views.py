@@ -175,6 +175,7 @@ def gerar_inicio_dos_trabalhos(request, sindicancia_id):
 
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
     sindicados = sindicancia.sindicados.all()
+    usuario = request.user
     documento = DocxTemplate(template_path)  # DOCUMENTO  EXEMPLO#
 
     #dia_inicio = sindicancia.data_inicio
@@ -185,6 +186,102 @@ def gerar_inicio_dos_trabalhos(request, sindicancia_id):
     anoini = sindicancia.data_inicio.year
 
     dia_inicio = f'{diaini} de {mesescritoini} de {anoini}'
+
+
+    posto_delegante = sindicancia.posto_delegante
+    nome_delegante = sindicancia.delegante
+    funcao_delegante = sindicancia.funcao_delegante
+    portaria = sindicancia.numero
+
+    #datada = sindicancia.data_portaria
+    mes_port= sindicancia.data_portaria.month
+    mesescritoport=mes_escrito(mes_port)
+    diaport=sindicancia.data_portaria.strftime('%d') if sindicancia.data_portaria else ''
+    anoport=sindicancia.data_portaria.year
+
+
+    datada= f'{diaport} de {mesescritoport} de {anoport}'
+    cidade = usuario.cidade
+    unidade = usuario.unidade
+    cr = usuario.cr
+    unidade1 = usuario.unidade.upper()
+    cr1 = usuario.cr.upper()
+    rua = usuario.rua
+    bairro = usuario.bairro
+    numero = usuario.numero
+    cep = usuario.cep
+    email = usuario.email_bpm
+    telefone= usuario.telefone
+
+
+
+
+    #dia_recebido = sindicancia.dia_recebido
+    mes_rec = sindicancia.dia_recebido.month
+    mesescritorec = mes_escrito(mes_rec)
+    diarec = sindicancia.dia_recebido.strftime('%d') if sindicancia.dia_recebido else ''
+    anorec = sindicancia.dia_recebido.year
+
+    dia_recebido = f'{diarec} de {mesescritorec} de {anorec}'
+
+
+
+    nome_delegada = sindicancia.delegada
+    posto_delegada = sindicancia.posto_delegada
+    rg_delegada = sindicancia.rg_delegada
+    context = {  # VARIÁ
+        "dia_inicio": f"{dia_inicio}",
+        "cr": f"{cr}",
+        "cr1": f"{cr1}",
+        "rua": f"{rua}",
+        "bairro": f"{bairro}",
+        "numero": f"{numero}",
+        "telefone": f"{telefone}",
+        "cep": f"{cep}",
+        "email": f"{email}",
+        "cidade": f"{cidade}",
+        "unidade": f"{unidade}",
+        "unidade1": f"{unidade1}",
+        "posto_delegante": f"{posto_delegante}",
+        "nome_delegante": f"{nome_delegante}",
+        "funcao_delegante": f"{funcao_delegante}",
+        "portaria": f"{portaria}",
+        "datada": f"{datada}",
+        "dia_recebido": f"{dia_recebido}",
+        "nome_delegada": f"{nome_delegada}",
+        "posto_delegada": f"{posto_delegada}",
+        "rg_delegada": f"{rg_delegada}",
+
+    }
+    documento.render(context)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    response['Content-Disposition'] = f'attachment; filename= inicio_dos_trabalhos {portaria}.docx'
+    documento.save(response)
+
+    return response
+
+@login_required(login_url='/')
+def gerar_termo_abertura(request, sindicancia_id):
+    template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'termo_abertura.docx')
+
+    sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
+    sindicados = sindicancia.sindicados.all()
+    usuario = request.user
+    documento = DocxTemplate(template_path)  # DOCUMENTO  EXEMPLO#
+
+    #dia_inicio = sindicancia.data_inicio
+
+    mes_ini = sindicancia.data_inicio.month
+
+    diaini = sindicancia.data_inicio.day
+    anoini = sindicancia.data_inicio.year
+    dia =dia_escrito(diaini)
+    mes = mes_escrito(mes_ini)
+    ano=ano_escrito(anoini)
+
+
+
 
 
     posto_delegante = sindicancia.posto_delegante
@@ -212,13 +309,35 @@ def gerar_inicio_dos_trabalhos(request, sindicancia_id):
 
     dia_recebido = f'{diarec} de {mesescritorec} de {anorec}'
 
-
-
+    cidade= usuario.cidade
+    unidade=usuario.unidade
+    cr = usuario.cr
+    unidade1 = usuario.unidade.upper()
+    cr1 = usuario.cr.upper()
+    rua=usuario.rua
+    bairro=usuario.bairro
+    numero=usuario.numero
+    telefone = usuario.telefone
+    cep=usuario.cep
+    email=usuario.email_bpm
     nome_delegada = sindicancia.delegada
     posto_delegada = sindicancia.posto_delegada
     rg_delegada = sindicancia.rg_delegada
     context = {  # VARIÁ
-        "dia_inicio": f"{dia_inicio}",
+        "dia": f"{dia}",
+        "mes": f"{mes}",
+        "ano": f"{ano}",
+        "cr": f"{cr}",
+        "cr1": f"{cr1}",
+        "rua": f"{rua}",
+        "bairro": f"{bairro}",
+        "numero": f"{numero}",
+        "cep": f"{cep}",
+        "email": f"{email}",
+        "telefone": f"{telefone}",
+        "cidade": f"{cidade}",
+        "unidade": f"{unidade}",
+        "unidade1": f"{unidade1}",
         "posto_delegante": f"{posto_delegante}",
         "nome_delegante": f"{nome_delegante}",
         "funcao_delegante": f"{funcao_delegante}",
@@ -233,10 +352,11 @@ def gerar_inicio_dos_trabalhos(request, sindicancia_id):
     documento.render(context)
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = f'attachment; filename= inicio_dos_trabalhos {portaria}.docx'
+    response['Content-Disposition'] = f'attachment; filename= Termo de Abertura {portaria}.docx'
     documento.save(response)
 
     return response
+
 
 
 @login_required(login_url='/')
@@ -365,11 +485,17 @@ def gerar_declaracao_testemunha(request,sindicancia_id,id):
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
     if testemunha.militar=='sim':
         template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'declaracao_testemunha_militar.docx')
+        profissao = 'Policial Militar'
+
 
     else:
+        profissao = testemunha.profissao
+
+
 
         template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'declaracao_testemunha.docx')
     usuario = request.user
+
 
 
 
@@ -381,11 +507,12 @@ def gerar_declaracao_testemunha(request,sindicancia_id,id):
 
     decla_sindicado = testemunha.declaracao
     nome_sindicado= testemunha.nome
+    graduacao = testemunha.graduacao
 
     mae_sindicado= testemunha.mae
     pai_sindicado= testemunha.pai
     rg_sindicado= testemunha.rgpm
-    profissao=testemunha.profissao
+
     endereco_sindicado=testemunha.endereco
     portaria= sindicancia.numero
 
@@ -472,7 +599,8 @@ def gerar_declaracao_testemunha(request,sindicancia_id,id):
         "sindicante": f"{sindicante}",
         "posto_sindicante": f"{posto_sindicante}",
         "rg_sindicante": f"{rg_sindicante}",
-        "data_inquiricao": f"{data_inquiricao}"
+        "data_inquiricao": f"{data_inquiricao}",
+        "graduacao": f"{graduacao}"
 
     }
     documento.render(context)
@@ -1521,7 +1649,7 @@ def gerar_remessa_dos_autos(request, sindicancia_id):
     nome_sindicante(doc,usuario,'Respeitosamente')
 
 
-    rodape(doc=doc)
+    rodape(doc=doc,usuario=usuario)
     nome = f'remessa sind{sindicancia.numero}'
 
 
@@ -1529,6 +1657,47 @@ def gerar_remessa_dos_autos(request, sindicancia_id):
     return gera_word(doc,nome)
 
 # remessa dos autos ______________________________________________________________________
+@login_required(login_url='/')
+def criar_oficio(request, sindicancia_id):
+
+
+
+    sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
+    sindicados = sindicancia.sindicados.all()
+    testemunhas = sindicancia.testemunhas.all()
+    ofendidos = sindicancia.ofendidos.all()
+    email = request.user.telefone
+
+
+    # Adicione as queries para testemunhas, ofendidos e ofícios conforme necessário
+    # testemunhas = sindicancia.testemunhas.all()
+    # ofendidos = sindicancia.ofendidos.all()
+    # oficios = sindicancia.oficios.all()
+    vixi= len(sindicados)
+
+
+
+
+
+    context = {
+        'sindicancia': sindicancia,
+        'sindicados': sindicados,
+        'testemunhas': testemunhas,
+        'ofendidos': ofendidos,
+        'user_email': email,
+
+        # Adicione as queries para testemunhas, ofendidos e ofícios conforme necessário
+        # 'testemunhas': testemunhas,
+        # 'ofendidos': ofendidos,
+
+         'vixi': vixi,
+
+    }
+
+
+    return render(request, 'criar_oficio.html', context)
+
+
 
 @login_required(login_url='/')
 def gerar_Oficio_padrao(request, sindicancia_id):

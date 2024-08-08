@@ -247,8 +247,12 @@
                 <button>Gerar Ofício de Remessa</button>
             </a>
 
-            <a href="{% url 'inicio:gerar_oficio_padrao' sindicancia.id %}">
+            <a href="{% url 'inicio:criar_oficio' sindicancia.id %}">
                 <button>Gerar Ofício Padrão</button>
+            </a>
+
+            <a href="{% url 'inicio:termo_abertura' sindicancia.id %}">
+                <button>Gerar Termo Abertura</button>
             </a>
 
             <button onclick="location.href='{% url 'inicio:sind_cadastradas' %}'"> Voltar</button>

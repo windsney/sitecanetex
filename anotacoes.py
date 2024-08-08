@@ -8,17 +8,48 @@
 from docx import Document
 from docx.shared import Pt, Cm
 
-# Criação do documento
-doc = Document()
 
-# Adiciona um parágrafo com o texto desejado
-paragrafo = doc.add_paragraph()
-run = paragrafo.add_run("Este é um texto em itálico e com recfdfdfjdflkdjfkdjflkdjflkdsjfldkfjdlskfjdslkfjdlfjdslfjdlfjdslfjlkjdfjdslfjdslkfjdslkfsdjflkjflksdfjdskfjdlfjkdlfjdskfjdflkjsdfklsdjflsdkfjsdklfjslkuo até o meio da página.")
-run.italic = True
+'''
+base de dados para oficio  como  base em detalhes sind para aparecer varios tipos
 
-# Define o recuo do parágrafo até o meio da página (assumindo uma largura de página padrão de 21 cm)
-# Metade da página seria 10.5 cm
-paragrafo.paragraph_format.left_indent = Cm(3.5)
 
-# Salva o documento
-doc.save("final.docx")
+<option value="solicitar_prorrogacao">Solicitar Prorrogação</option>
+                    <option value="solicitar_dilacao">Solicitar Dilação</option>
+                    <option value="solicitar_sobrestamento">Solicitar Sobrestamento</option>
+                    <option value="notificar_testemunha">Notificar Testemunha</option>
+                    <option value="notificar_ofendido">Notificar Ofendido</option>
+                    <option value="notificar_sindicado">Notificar Sindicado</option>
+                    <option value="oficio_diverso">Ofício Diverso</option>
+                    
+esses tipos
+
+oficio de remessa
+oficio de inicio
+termo de abertura
+
+termo de encerramento de volume
+termo de abertura de volume
+juntada
+
+tipos de campos na tabela
+
+nome_destinatario
+cargo/funcao
+posto
+local
+data
+hora
+motivo
+endereco
+telefone
+texto
+tratamento
+id_portaria
+fls
+
+
+
+
+
+
+'''

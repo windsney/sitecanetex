@@ -23,10 +23,13 @@ urlpatterns = [
     path('sindicancia/<int:sindicancia_id>/cadastrar_ofendido/', inicio.views.cadastrar_ofendido, name='cadastrar_ofendido'),
     path('sindicancia/<int:sindicancia_id>/', inicio.views.detalhes_sindicancia, name='detalhes_sindicancia'),
     #botoés de  ação no  fim da pagina da  sindicancia
+    path('sindicancia/<int:sindicancia_id>/tabertura', inicio.views.gerar_termo_abertura, name='termo_abertura'),
     path('sindicancia/<int:sindicancia_id>/iniciot', inicio.views.gerar_inicio_dos_trabalhos, name='inicio_dos_trabalhos'),
     path('sindicancia/<int:sindicancia_id>/relatorio_sind', inicio.views.gerar_relatorio, name='relatorio_sind'),
     path('sindicancia/<int:sindicancia_id>/remessa', inicio.views.gerar_remessa_dos_autos, name='gerar_remessa_dos_autos'),
     path('sindicancia/<int:sindicancia_id>/ofpadrao', inicio.views.gerar_Oficio_padrao, name='gerar_oficio_padrao'),
+    path('sindicancia/<int:sindicancia_id>/criaroficio', inicio.views.criar_oficio, name='criar_oficio'),
+
 
 
     path('sindicancia/<int:sindicancia_id>/decsind/<int:id>', inicio.views.gerar_declaracao_sindicado, name='declaracao_sindicado'),
