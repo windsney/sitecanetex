@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Botões</title>
+    <style>
+        body {
+            background-color: #D8BFD8; /* Fundo roxo claro */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Alinha os itens no início verticalmente */
+            height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px; /* Aumenta a largura máxima */
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 100px; /* Aumenta a distância do topo */
+        }
+        h2 {
+            text-align: center;
+            color: #4B0082; /* Cor do título */
+            margin-bottom: 20px;
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap; /* Permite que os botões quebrem para a próxima linha */
+            justify-content: space-between;
+            gap: 10px; /* Espaço entre os botões */
+        }
+        .button-container button {
+            flex: 1 1 calc(33% - 20px); /* Faz com que cada botão ocupe aproximadamente 33% da largura */
+            padding: 10px;
+            background-color: #4B0082; /* Cor do botão */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .button-container button:hover {
+            background-color: #6A0DAD;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Página de Botões</h2>
+        <div class="button-container">
+
+            <a href="{% url 'inicio:termo_abertura' sindicancia.id %}">
+                <button>Termo Abertura</button>
+            </a>
+            <a href="{% url 'inicio:inicio_dos_trabalhos' sindicancia.id %}">
+                <button>Ofício de Início dos Trabalhos</button>
+            </a>
+
+            <a href="{% url 'inicio:oficio_prorrogacao' %}">
+                <button>Solicitar Prorrogação</button>
+            <a/>
+            <button>Solicitar Dilação</button>
+            <button>Solicitar Sobrestamento</button>
+            <a href="{% url 'inicio:btn_test' sindicancia.id 'test' %}">
+                <button>Notificar Testemunha</button>
+            <a/>
+
+            <a href="{% url 'inicio:btn_ofen' sindicancia.id 'test' %}">
+                <button>Notificar Ofendido</button>
+            <a/>
+
+             <a href="{% url 'inicio:btn_sind' sindicancia.id 'test' %}">
+                <button>Notificar Sindicado</button>
+            <a/>
+
+
+            <button>Juntada</button>
+            <button>Ofício Diverso</button>
+            <a href="{% url 'inicio:gerar_remessa_dos_autos' sindicancia.id %}">
+                <button>Ofício de Remessa</button>
+            </a>
+
+            <button>Termo de Encerramento de Volume</button>
+            <button>Termo de Abertura de Volume</button>
+
+        </div>
+        <button onclick="location.href='{% url 'inicio:detalhes_sindicancia' sindicancia.id %}'"> Voltar</button>
+    </div>
+</body>
+</html>

@@ -525,9 +525,9 @@ def gerar_declaracao_testemunha(request,sindicancia_id,id):
 
     hora_inicio=testemunha.hora_inicio
     hora_fim=testemunha.hora_fim
-    sindicante= sindicancia.delegada
-    posto_sindicante=sindicancia.posto_delegada
-    rg_sindicante= sindicancia.rg_delegada
+    sindicante= usuario.nome_completo
+    posto_sindicante=usuario.posto
+    rg_sindicante= usuario.rgpm
     cpf=testemunha.cpf
     email=testemunha.email
     telefone= testemunha.telefone
@@ -1695,12 +1695,12 @@ def criar_oficio(request, sindicancia_id):
     }
 
 
-    return render(request, 'criar_oficio.html', context)
+    return render(request, 'botoes.html', context)
 
 
 
 @login_required(login_url='/')
-def gerar_Oficio_padrao(request, sindicancia_id):
+def gerar_notificacao(request, sindicancia_id,condicao):
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
 
     sindicados = Sindicado.objects.filter(portaria_id=sindicancia_id)
@@ -1725,12 +1725,22 @@ def gerar_Oficio_padrao(request, sindicancia_id):
     dia_inquiricao='13/05/2024'
     dia_semana ='sexta-feira'
     hora_inquiricao='13h00min'
-    condicao='Ofendido'
+    if condicao=='test':
+        condicao='Testemunha'
+
+    elif condicao=='ofen':
+        condicao='Ofendido'
+        print(condicao)
+
+    else:
+        condicao='Sindicado'
+        print(condicao)
+
 
     assunto='Solicitação (FAZ)'
     nome_notificado='Pedro Coala da Silva Perira'
     cargoouendereco='Rua augusta , Cidade: Jaciara MT'
-    texto_solicitacao=f'Notifico Vossa Senhoria a comparecer no {usuario.unidade}, {usuario.rua}, nº {usuario.numero},Bairro: {usuario.bairro},Cidade: {usuario.cidade}, no dia {dia_inquiricao} ({dia_semana}) às {hora_inquiricao}, fins de prestar esclarecimentos como {condicao} na Sindicância  Portaria nº {sindicancia.numero}, de {data_formatada}, em referência a fim de ser inquirido sobre os fatos narrados na portaria. Dúvidas entrar em contato por meio do telefone: {usuario.telefone} {usuario.posto} {usuario.nome_completo}.'
+    texto_solicitacao=f'Notifico Vossa Senhoria a comparecer no {usuario.unidade}, {usuario.rua}, nº {usuario.numero},Bairro: {usuario.bairro},Cidade: {usuario.cidade}, no dia {dia_inquiricao} ({dia_semana}) às {hora_inquiricao}, fins de prestar esclarecimentos na condição de {condicao} na Sindicância  Portaria nº {sindicancia.numero}, de {data_formatada}, em referência a fim de ser inquirido sobre os fatos narrados na portaria. Dúvidas entrar em contato por meio do telefone: {usuario.telefone} {usuario.posto} {usuario.nome_completo}.'
 
 
     criar_paragrafo(doc,f'{nome_notificado}/ {cargoouendereco}')
@@ -1747,7 +1757,15 @@ def gerar_Oficio_padrao(request, sindicancia_id):
     rodape(doc,usuario)
 
     return gera_word(doc,nome=f'oficio_teste{sindicancia.numero}')
+class Oficio_prorrogacao (TemplateView):
+    template_name = "oficio_prorrogacao.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['autoridade'] = "Nome da Autoridade Exemplo"
+        context['motivo'] = "Solicitação de prorrogação devido a razões específicas."
+        context['data'] = datetime.now().strftime('%d de %B de %Y')
+        return context
 
 
 

@@ -3,7 +3,7 @@
 from django.urls import path
 
 import inicio.views
-from.views import Sind_Cadastradas,Cd,Inquerito,RIOG,Criar_conta
+from.views import Sind_Cadastradas,Cd,Inquerito,RIOG,Criar_conta,Oficio_prorrogacao
 from django.contrib.auth import views as auth_view
 
 app_name='inicio'
@@ -16,6 +16,7 @@ urlpatterns = [
     path('', auth_view.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_view.LogoutView.as_view(next_page='inicio:login'), name='logout'),
     path('criar_conta/', Criar_conta.as_view(), name='criar_conta'),
+    path('oficio_prorrogacao/', Oficio_prorrogacao.as_view(), name='oficio_prorrogacao'),
     #path('cad_sind/<int:pk>',Detalhe_sind.as_view(), name='detalhe'),
     #path('cad_investigado_sind/<int:pk>',Cadastro_investigado_sind.as_view(), name='cadastro_investigado_sind'),
     path('sindicancia/<int:sindicancia_id>/cadastrar_sindicado/', inicio.views.cadastrar_sindicado, name='cadastrar_sindicado'),
@@ -24,10 +25,13 @@ urlpatterns = [
     path('sindicancia/<int:sindicancia_id>/', inicio.views.detalhes_sindicancia, name='detalhes_sindicancia'),
     #botoés de  ação no  fim da pagina da  sindicancia
     path('sindicancia/<int:sindicancia_id>/tabertura', inicio.views.gerar_termo_abertura, name='termo_abertura'),
+
+    ####Botoes########################################
     path('sindicancia/<int:sindicancia_id>/iniciot', inicio.views.gerar_inicio_dos_trabalhos, name='inicio_dos_trabalhos'),
     path('sindicancia/<int:sindicancia_id>/relatorio_sind', inicio.views.gerar_relatorio, name='relatorio_sind'),
+    path('sindicancia/<int:sindicancia_id>/<str:condicao>/', inicio.views.gerar_notificacao, name='btn_test'),
     path('sindicancia/<int:sindicancia_id>/remessa', inicio.views.gerar_remessa_dos_autos, name='gerar_remessa_dos_autos'),
-    path('sindicancia/<int:sindicancia_id>/ofpadrao', inicio.views.gerar_Oficio_padrao, name='gerar_oficio_padrao'),
+
     path('sindicancia/<int:sindicancia_id>/criaroficio', inicio.views.criar_oficio, name='criar_oficio'),
 
 

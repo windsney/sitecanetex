@@ -233,9 +233,6 @@
         </div>
 
         <div class="button-container">
-             <a href="{% url 'inicio:inicio_dos_trabalhos' sindicancia.id %}">
-                <button>Ofício de Início dos Trabalhos</button>
-            </a>
 
             <button>Citação</button>
 
@@ -243,17 +240,13 @@
                 <button>Gerar Relatório</button>
             </a>
 
-            <a href="{% url 'inicio:gerar_remessa_dos_autos' sindicancia.id %}">
-                <button>Gerar Ofício de Remessa</button>
-            </a>
+
 
             <a href="{% url 'inicio:criar_oficio' sindicancia.id %}">
-                <button>Gerar Ofício Padrão</button>
+                <button>Gerar Ofícios</button>
             </a>
 
-            <a href="{% url 'inicio:termo_abertura' sindicancia.id %}">
-                <button>Gerar Termo Abertura</button>
-            </a>
+
 
             <button onclick="location.href='{% url 'inicio:sind_cadastradas' %}'"> Voltar</button>
 
