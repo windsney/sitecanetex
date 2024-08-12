@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Sindicancia,Sindicado,Ipm,Conselho,Riog,Testemunha,Ofendido,Usuario
+from .models import Sindicancia,Sindicado,Ipm,Conselho,Riog,Testemunha,Ofendido,Usuario,Oficio
 from django.contrib.auth.admin import UserAdmin
 
 campos= list(UserAdmin.fieldsets)
@@ -13,6 +13,7 @@ admin.site.register(Sindicancia)
 admin.site.register(Sindicado)
 admin.site.register(Testemunha)
 admin.site.register(Ofendido)
+admin.site.register(Oficio)
 admin.site.register(Ipm)
 admin.site.register(Conselho)
 admin.site.register(Riog)

@@ -114,6 +114,36 @@ class Ofendido (models.Model):
 
     def __str__(self):
         return self.nome
+
+
+class Oficio (models.Model):
+
+    tipo=models.CharField(max_length=100)
+    nome_destinatario=models.CharField(max_length=100)
+    cargofuncao=models.CharField(max_length=100)
+    posto=models.CharField(max_length=100)
+
+    local=models.CharField(max_length=100)
+
+    motivo=models.CharField(max_length=100,default=0)
+    endereco=models.CharField(max_length=100,default=0)
+    telefone=models.CharField(max_length=100,default=0)
+    texto=models.CharField(max_length=1000,default=0)
+
+
+    tratamento = models.CharField(max_length=100, default=0)
+    id_portaria = models.CharField(max_length=100, default=0)
+    fls = models.CharField(max_length=100, default=0)
+    data = models.DateField(default=date(2024, 7, 3))
+    hora = models.CharField(max_length=20, default=0)
+
+
+
+
+
+
+
+
 class Ipm (models.Model):
     numero=models.CharField(max_length=100)
     unidade=models.CharField(max_length=100)

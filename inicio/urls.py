@@ -29,7 +29,9 @@ urlpatterns = [
     ####Botoes########################################
     path('sindicancia/<int:sindicancia_id>/iniciot', inicio.views.gerar_inicio_dos_trabalhos, name='inicio_dos_trabalhos'),
     path('sindicancia/<int:sindicancia_id>/relatorio_sind', inicio.views.gerar_relatorio, name='relatorio_sind'),
-    path('sindicancia/<int:sindicancia_id>/<str:condicao>/', inicio.views.gerar_notificacao, name='btn_test'),
+    path('sindicancia/<int:sindicancia_id>/<str:condicao>/', inicio.views.cadastrar_notificacao_test, name='btn_test'),
+    path('sindicancia/<int:sindicancia_id>/<str:condicao>/', inicio.views.cadastrar_notificacao_test, name='btn_ofen'),
+    path('sindicancia/<int:sindicancia_id>/<str:condicao>/', inicio.views.cadastrar_notificacao_test, name='btn_sind'),
     path('sindicancia/<int:sindicancia_id>/remessa', inicio.views.gerar_remessa_dos_autos, name='gerar_remessa_dos_autos'),
 
     path('sindicancia/<int:sindicancia_id>/criaroficio', inicio.views.criar_oficio, name='criar_oficio'),

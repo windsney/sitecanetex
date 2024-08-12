@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import Sindicado,Sindicancia,Testemunha,Ofendido,Usuario
+from .models import Sindicado,Sindicancia,Testemunha,Ofendido,Usuario,Oficio
 
 class SindicadoForm(forms.ModelForm):
     class Meta:
@@ -152,4 +152,80 @@ class UsuarioForm(UserCreationForm):
     ]
 
     posto = forms.ChoiceField(choices=POSTO_CHOICES)
+
+
+from django import forms
+from .models import Testemunha, Oficio
+
+
+class NotificarTestForm(forms.ModelForm):
+    nome_destinatario = forms.ModelChoiceField(
+        queryset=Testemunha.objects.none(),
+        label="Selecionar Testemunha",
+        widget=forms.Select  # Usando Select para um listbox simples
+    )
+
+    class Meta:
+        model = Oficio
+        fields = ['nome_destinatario', 'data', 'hora']
+
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date'}),
+            'hora': forms.TimeInput(attrs={'type': 'time'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        sindicancia_id = kwargs.pop('sindicancia_id', None)  # Pegando o sindicancia_id dos argumentos
+        super(NotificarTestForm, self).__init__(*args, **kwargs)
+        if sindicancia_id:
+            # Filtra as testemunhas relacionadas à sindicância específica
+            self.fields['nome_destinatario'].queryset = Testemunha.objects.filter(portaria_id=sindicancia_id)
+
+
+class NotificarOfenForm(forms.ModelForm):
+    nome_destinatario = forms.ModelChoiceField(
+        queryset=Ofendido.objects.none(),
+        label="Selecionar Ofendido",
+        widget=forms.Select  # Usando Select para um listbox simples
+    )
+
+    class Meta:
+        model = Oficio
+        fields = ['nome_destinatario', 'data', 'hora']
+
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date'}),
+            'hora': forms.TimeInput(attrs={'type': 'time'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        sindicancia_id = kwargs.pop('sindicancia_id', None)  # Pegando o sindicancia_id dos argumentos
+        super(NotificarOfenForm, self).__init__(*args, **kwargs)
+        if sindicancia_id:
+            # Filtra as testemunhas relacionadas à sindicância específica
+            self.fields['nome_destinatario'].queryset = Ofendido.objects.filter(portaria_id=sindicancia_id)
+
+
+class NotificarSindForm(forms.ModelForm):
+    nome_destinatario = forms.ModelChoiceField(
+        queryset=Sindicado.objects.none(),
+        label="Selecionar Sindicado",
+        widget=forms.Select  # Usando Select para um listbox simples
+    )
+
+    class Meta:
+        model = Oficio
+        fields = ['nome_destinatario', 'data', 'hora']
+
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date'}),
+            'hora': forms.TimeInput(attrs={'type': 'time'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        sindicancia_id = kwargs.pop('sindicancia_id', None)  # Pegando o sindicancia_id dos argumentos
+        super(NotificarSindForm, self).__init__(*args, **kwargs)
+        if sindicancia_id:
+            # Filtra as testemunhas relacionadas à sindicância específica
+            self.fields['nome_destinatario'].queryset = Sindicado.objects.filter(portaria_id=sindicancia_id)
 

@@ -1,12 +1,13 @@
 from django.shortcuts import render,reverse
-from .models import Sindicancia,Sindicado,Ofendido,Testemunha
+from .models import Sindicancia,Sindicado,Ofendido,Testemunha,Oficio
 from django.views.generic import TemplateView,ListView,DetailView, FormView
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.style import WD_STYLE_TYPE
 import os
+import locale
 from django.shortcuts import render, get_object_or_404, redirect
 from django.conf import settings
-from .forms import SindicadoForm,SindicanciaForm,TestemunhaForm,OfendidoForm,UsuarioForm
+from .forms import SindicadoForm,SindicanciaForm,TestemunhaForm,OfendidoForm,UsuarioForm,NotificarTestForm,NotificarOfenForm,NotificarSindForm
 from datetime import datetime
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -1697,7 +1698,109 @@ def criar_oficio(request, sindicancia_id):
 
     return render(request, 'botoes.html', context)
 
+def cadastrar_notificacao_test(request, sindicancia_id, condicao):
+    sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
+    usuario = request.user
 
+
+    if request.method == 'POST':
+        if condicao == 'test':
+            form = NotificarTestForm(request.POST, sindicancia_id=sindicancia_id)
+        elif condicao == 'ofen':
+            form = NotificarOfenForm(request.POST, sindicancia_id=sindicancia_id)
+        elif condicao == 'sind':
+            form = NotificarSindForm(request.POST, sindicancia_id=sindicancia_id)
+        if form.is_valid():
+            nome_notificado = form.cleaned_data['nome_destinatario']
+            data_inquiricao = form.cleaned_data.get('data')  # Já é um objeto datetime.date
+            hora_inquiricao = form.cleaned_data.get('hora')
+            endereco_testemunha = nome_notificado.endereco
+
+            # Formatar a data e o dia da semana
+            dia_inquiricao = data_inquiricao.strftime('%d/%m/%Y')
+            dia_semana_ingles = data_inquiricao.strftime('%A')
+            dias_da_semana = {
+                'Monday': 'segunda-feira',
+                'Tuesday': 'terça-feira',
+                'Wednesday': 'quarta-feira',
+                'Thursday': 'quinta-feira',
+                'Friday': 'sexta-feira',
+                'Saturday': 'sábado',
+                'Sunday': 'domingo'
+            }
+
+            # Obtenha o nome do dia da semana em inglês
+
+
+            # Converta para português usando o dicionário
+            dia_semana = dias_da_semana.get(dia_semana_ingles, dia_semana_ingles)
+
+            # Criar o documento .docx
+            template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'relatorio_modelo.docx')
+            doc = Document(template_path)
+
+            # Preencher o documento com os dados necessários
+            cabecalho(doc, usuario)
+
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, '')
+
+            data_original = f'{sindicancia.data_portaria}'
+            data_obj = datetime.strptime(data_original, '%Y-%m-%d')
+            data_formatada = data_obj.strftime('%d.%m.%y')
+
+            print(condicao)
+
+
+
+
+            if condicao == 'test':
+                condicao = 'Testemunha'
+                cargoouendereco=endereco_testemunha
+            elif condicao == 'ofen':
+                condicao = 'Ofendido'
+            else:
+                condicao = 'Sindicado'
+
+            assunto = 'Solicitação (FAZ)'
+
+            texto_solicitacao = (
+                f'Notifico Vossa Senhoria a comparecer no {usuario.unidade}, {usuario.rua}, nº {usuario.numero},'
+                f'Bairro: {usuario.bairro},Cidade: {usuario.cidade}, no dia {data_inquiricao.strftime("%d/%m/%Y")} ({dia_semana}) '
+                f'às {hora_inquiricao}, fins de prestar esclarecimentos na condição de {condicao} '
+                f'na Sindicância Portaria nº {sindicancia.numero}, de {data_formatada}, em referência a fim de ser inquirido '
+                f'sobre os fatos narrados na portaria. Dúvidas entrar em contato por meio do telefone: '
+                f'{usuario.telefone} {usuario.posto} {usuario.nome_completo}.'
+            )
+
+            criar_paragrafo(doc, f'{nome_notificado}/ {cargoouendereco}')
+            criar_paragrafo(doc, f'Ref: Portaria nº{sindicancia.numero}, datada de {data_formatada}.')
+            criar_paragrafo(doc, f'Assunto: {assunto}')
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, f"{texto_solicitacao}", lado='justificado')
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, '')
+
+            nome_sindicante(doc, usuario, 'Atenciosamente')
+            rodape(doc, usuario)
+
+            # Gerar o arquivo para download
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+            response['Content-Disposition'] = f'attachment; filename="notificacao_{condicao}-{nome_notificado}.docx"'
+            doc.save(response)
+            return response
+    else:
+        if condicao == 'test':
+            form = NotificarTestForm(sindicancia_id=sindicancia_id)
+        elif condicao == 'sind':
+            form = NotificarSindForm(sindicancia_id=sindicancia_id)
+        elif condicao == 'ofen':
+            form = NotificarOfenForm(sindicancia_id=sindicancia_id)
+
+
+
+    return render(request, 'gerar_notificacao_test.html', {'form': form, 'usuario': usuario})
 
 @login_required(login_url='/')
 def gerar_notificacao(request, sindicancia_id,condicao):
@@ -1707,56 +1810,14 @@ def gerar_notificacao(request, sindicancia_id,condicao):
     ofendidos = Ofendido.objects.filter(portaria_id=sindicancia_id)
     usuario = request.user
     testemunhas = Testemunha.objects.filter(portaria_id=sindicancia_id)
-    template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'relatorio_modelo.docx')
-    # Criar um novo documento
-    doc = Document(template_path)
-
-    cabecalho(doc,usuario)
-
-    criar_paragrafo(doc, '')
-    criar_paragrafo(doc, '')
-
-    data_original = f'{sindicancia.data_portaria}'
-
-    # Converter a string para um objeto datetime
-    data_obj = datetime.strptime(data_original, '%Y-%m-%d')
-    # Formatar a data no novo formato
-    data_formatada = data_obj.strftime('%d.%m.%y')
-    dia_inquiricao='13/05/2024'
-    dia_semana ='sexta-feira'
-    hora_inquiricao='13h00min'
-    if condicao=='test':
-        condicao='Testemunha'
-
-    elif condicao=='ofen':
-        condicao='Ofendido'
-        print(condicao)
-
-    else:
-        condicao='Sindicado'
-        print(condicao)
 
 
-    assunto='Solicitação (FAZ)'
-    nome_notificado='Pedro Coala da Silva Perira'
-    cargoouendereco='Rua augusta , Cidade: Jaciara MT'
-    texto_solicitacao=f'Notifico Vossa Senhoria a comparecer no {usuario.unidade}, {usuario.rua}, nº {usuario.numero},Bairro: {usuario.bairro},Cidade: {usuario.cidade}, no dia {dia_inquiricao} ({dia_semana}) às {hora_inquiricao}, fins de prestar esclarecimentos na condição de {condicao} na Sindicância  Portaria nº {sindicancia.numero}, de {data_formatada}, em referência a fim de ser inquirido sobre os fatos narrados na portaria. Dúvidas entrar em contato por meio do telefone: {usuario.telefone} {usuario.posto} {usuario.nome_completo}.'
 
 
-    criar_paragrafo(doc,f'{nome_notificado}/ {cargoouendereco}')
-    criar_paragrafo(doc,f'Ref: Portaria nº{sindicancia.numero}, datada de {data_formatada}.')
-    criar_paragrafo(doc, f'Assunto: {assunto}')
-    criar_paragrafo(doc,'')
-    criar_paragrafo(doc, '')
-    criar_paragrafo(doc,f"{texto_solicitacao}",lado='justificado')
-    criar_paragrafo(doc,'')
-    criar_paragrafo(doc, '')
 
-    nome_sindicante(doc,usuario,'Atenciosamente')
 
-    rodape(doc,usuario)
 
-    return gera_word(doc,nome=f'oficio_teste{sindicancia.numero}')
+
 class Oficio_prorrogacao (TemplateView):
     template_name = "oficio_prorrogacao.html"
 
@@ -1910,7 +1971,7 @@ def gera_word(doc,nome):
 
     # Configurar a resposta HTTP para download do arquivo
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = f'attachment; filename="relatorio_{nome}.docx"'
+    response['Content-Disposition'] = f'attachment; filename="{nome}.docx"'
 
     # Salvar o documento modificado na resposta
     try:
