@@ -1535,6 +1535,12 @@ def gerar_remessa_dos_autos(request, sindicancia_id):
     template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'relatorio_modelo.docx')
     # Criar um novo documento
     doc = Document(template_path)
+    oficio = Oficio()
+
+    num = Oficio.objects.filter(id_portaria=sindicancia.id).aggregate(Max('numero'))['numero__max']
+    print(num)
+
+    oficio.save()
 
 
 
@@ -1543,7 +1549,7 @@ def gerar_remessa_dos_autos(request, sindicancia_id):
 
 
     cabecalho(doc,usuario)
-    numero='12'
+    numero=oficio.numero
 
     char_style = doc.styles.add_style('CustomCharStyle', WD_STYLE_TYPE.CHARACTER)
     char_style.font.name = 'Times New Roman'
