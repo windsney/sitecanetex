@@ -120,12 +120,13 @@ class Oficio (models.Model):
 
     tipo=models.CharField(max_length=100)
     nome_destinatario=models.CharField(max_length=100)
+    numero = models.CharField(max_length=10,default=0)
     cargofuncao=models.CharField(max_length=100)
     posto=models.CharField(max_length=100)
 
     local=models.CharField(max_length=100)
 
-    motivo=models.CharField(max_length=100,default=0)
+    motivo=models.CharField(max_length=100)
     endereco=models.CharField(max_length=100,default=0)
     telefone=models.CharField(max_length=100,default=0)
     texto=models.CharField(max_length=1000,default=0)
@@ -136,6 +137,12 @@ class Oficio (models.Model):
     fls = models.CharField(max_length=100, default=0)
     data = models.DateField(default=date(2024, 7, 3))
     hora = models.CharField(max_length=20, default=0)
+
+    class Meta:
+        ordering = ['numero']  # Ordena em ordem crescente por padrão
+
+
+
 
 
 

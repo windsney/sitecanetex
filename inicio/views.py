@@ -7,7 +7,7 @@ import os
 import locale
 from django.shortcuts import render, get_object_or_404, redirect
 from django.conf import settings
-from .forms import SindicadoForm,SindicanciaForm,TestemunhaForm,OfendidoForm,UsuarioForm,NotificarTestForm,NotificarOfenForm,NotificarSindForm
+from .forms import SindicadoForm,SindicanciaForm,TestemunhaForm,OfendidoForm,UsuarioForm,NotificarTestForm,NotificarOfenForm,NotificarSindForm,PrazoForm
 from datetime import datetime
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -28,6 +28,7 @@ from django.http import HttpResponse
 from meu_modulo.data_escrita import *
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.db.models import Max
 
 
 
@@ -1535,7 +1536,14 @@ def gerar_remessa_dos_autos(request, sindicancia_id):
     # Criar um novo documento
     doc = Document(template_path)
 
+
+
+
+
+
+
     cabecalho(doc,usuario)
+    numero='12'
 
     char_style = doc.styles.add_style('CustomCharStyle', WD_STYLE_TYPE.CHARACTER)
     char_style.font.name = 'Times New Roman'
@@ -1553,7 +1561,7 @@ def gerar_remessa_dos_autos(request, sindicancia_id):
     paragraph1 = doc.add_paragraph()
     paragraph1 = doc.add_paragraph('')
     paragraph1.paragraph_format.space_before = Pt(15)
-    run1 = paragraph1.add_run(f'Ofício nº. 007/SIND/7ºCR/2024	       {usuario.cidade}, {dia} de {mes_escrito(mes)} de {ano}.')
+    run1 = paragraph1.add_run(f'Ofício nº. {numero}/SIND/7ºCR/2024	       {usuario.cidade}, {dia} de {mes_escrito(mes)} de {ano}.')
     run1.style = 'CustomCharStyle'
     paragraph1.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
@@ -1697,7 +1705,7 @@ def criar_oficio(request, sindicancia_id):
 
 
     return render(request, 'botoes.html', context)
-
+@login_required(login_url='/')
 def cadastrar_notificacao_test(request, sindicancia_id, condicao):
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
     usuario = request.user
@@ -1711,10 +1719,28 @@ def cadastrar_notificacao_test(request, sindicancia_id, condicao):
         elif condicao == 'sind':
             form = NotificarSindForm(request.POST, sindicancia_id=sindicancia_id)
         if form.is_valid():
+            oficio=form.save(commit=False)
+            oficio.id_portaria=sindicancia.id
+
+            try:
+                num = Oficio.objects.filter(id_portaria=sindicancia.id).aggregate(Max('numero'))['numero__max']
+                oficio.numero = int(num) + 1
+            except:
+                num = Oficio.objects.aggregate(Max('numero'))['numero__max']
+                oficio.numero = int(num) + 1
+
+
+
+
+
             nome_notificado = form.cleaned_data['nome_destinatario']
             data_inquiricao = form.cleaned_data.get('data')  # Já é um objeto datetime.date
             hora_inquiricao = form.cleaned_data.get('hora')
             endereco_testemunha = nome_notificado.endereco
+
+
+
+
 
             # Formatar a data e o dia da semana
             dia_inquiricao = data_inquiricao.strftime('%d/%m/%Y')
@@ -1735,6 +1761,8 @@ def cadastrar_notificacao_test(request, sindicancia_id, condicao):
             # Converta para português usando o dicionário
             dia_semana = dias_da_semana.get(dia_semana_ingles, dia_semana_ingles)
 
+
+
             # Criar o documento .docx
             template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'relatorio_modelo.docx')
             doc = Document(template_path)
@@ -1749,7 +1777,7 @@ def cadastrar_notificacao_test(request, sindicancia_id, condicao):
             data_obj = datetime.strptime(data_original, '%Y-%m-%d')
             data_formatada = data_obj.strftime('%d.%m.%y')
 
-            print(condicao)
+
 
 
 
@@ -1789,6 +1817,11 @@ def cadastrar_notificacao_test(request, sindicancia_id, condicao):
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
             response['Content-Disposition'] = f'attachment; filename="notificacao_{condicao}-{nome_notificado}.docx"'
             doc.save(response)
+
+            oficio.tipo=f'Notificação de {condicao}'
+
+            oficio.save()
+            form.save()
             return response
     else:
         if condicao == 'test':
@@ -1803,30 +1836,95 @@ def cadastrar_notificacao_test(request, sindicancia_id, condicao):
     return render(request, 'gerar_notificacao_test.html', {'form': form, 'usuario': usuario})
 
 @login_required(login_url='/')
-def gerar_notificacao(request, sindicancia_id,condicao):
+def Oficio_prazo (request, sindicancia_id, condicao):
+
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
-
-    sindicados = Sindicado.objects.filter(portaria_id=sindicancia_id)
-    ofendidos = Ofendido.objects.filter(portaria_id=sindicancia_id)
     usuario = request.user
-    testemunhas = Testemunha.objects.filter(portaria_id=sindicancia_id)
+
+
+    if request.method == 'POST':
+        if condicao == 'prorrogacao':
+            form = PrazoForm(request.POST, sindicancia_id=sindicancia_id)
+            condicao='Prorrogação'
+
+        elif condicao == 'dilacao':
+            form = PrazoForm(request.POST, sindicancia_id=sindicancia_id)
+            condicao = 'Dilação'
+        elif condicao == 'sobrestamento':
+            form = PrazoForm(request.POST, sindicancia_id=sindicancia_id)
+            condicao = 'Sobrestamento'
+        if form.is_valid():
+            oficio = form.save(commit=False)
+
+            try:
+                num = Oficio.objects.filter(id_portaria=sindicancia.id).aggregate(Max('numero'))['numero__max']
+                oficio.numero = int(num) + 1
+            except:
+                num = Oficio.objects.aggregate(Max('numero'))['numero__max']
+                oficio.numero = int(num) + 1
+
+            oficio.numero = int(num) + 1
+            oficio.tipo= f'Solicitação de {condicao}'
+            oficio.save()
+
+            motivo = form.cleaned_data.get('motivo')  # Já é um objeto datetime.date
+
+
+            # Criar o documento .docx
+            template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'relatorio_modelo.docx')
+            doc = Document(template_path)
+
+            # Preencher o documento com os dados necessários
+            cabecalho(doc, usuario)
+
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, '')
+
+            data_original = f'{sindicancia.data_portaria}'
+            data_obj = datetime.strptime(data_original, '%Y-%m-%d')
+            data_formatada = data_obj.strftime('%d.%m.%y')
 
 
 
+            assunto = 'Solicitação (FAZ)'
 
+            texto_solicitacao = (
+                f'Notifico Vossa Senhoria a comparecer no {usuario.unidade}, {usuario.rua}, nº {usuario.numero},'
+                f'Bairro: {usuario.bairro},Cidade: {usuario.cidade}, no dia , fins de prestar esclarecimentos na condição de {condicao} '
+                f'na Sindicância Portaria nº {sindicancia.numero}, de {data_formatada}, em referência a fim de ser inquirido '
+                f'sobre os fatos narrados na portaria. {motivo}Dúvidas entrar em contato por meio do telefone: '
+                f'{usuario.telefone} {usuario.posto} {usuario.nome_completo}.'
+            )
 
+            #criar_paragrafo(doc, f'{nome_notificado}')
+            criar_paragrafo(doc, f'Ref: Portaria nº{sindicancia.numero}, datada de {data_formatada}.')
+            criar_paragrafo(doc, f'Assunto: {assunto}')
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, f"{texto_solicitacao}", lado='justificado')
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, '')
 
+            nome_sindicante(doc, usuario, 'Atenciosamente')
+            rodape(doc, usuario)
 
+            # Gerar o arquivo para download
+            response = HttpResponse(
+                content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+            response['Content-Disposition'] = f'attachment; filename="{condicao}.docx"'
+            doc.save(response)
 
-class Oficio_prorrogacao (TemplateView):
-    template_name = "oficio_prorrogacao.html"
+            form.save()
+            return response
+    else:
+        if condicao == 'prorrogacao':
+            form = PrazoForm(sindicancia_id=sindicancia_id)
+        elif condicao == 'dilacao':
+            form = PrazoForm(sindicancia_id=sindicancia_id)
+        elif condicao == 'sobrestamento':
+            form = PrazoForm(sindicancia_id=sindicancia_id)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['autoridade'] = "Nome da Autoridade Exemplo"
-        context['motivo'] = "Solicitação de prorrogação devido a razões específicas."
-        context['data'] = datetime.now().strftime('%d de %B de %Y')
-        return context
+    return render(request, 'gerar_prazo.html', {'form': form, 'usuario': usuario})
 
 
 

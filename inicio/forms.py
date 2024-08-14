@@ -229,3 +229,16 @@ class NotificarSindForm(forms.ModelForm):
             # Filtra as testemunhas relacionadas à sindicância específica
             self.fields['nome_destinatario'].queryset = Sindicado.objects.filter(portaria_id=sindicancia_id)
 
+
+class PrazoForm(forms.ModelForm):
+
+    class Meta:
+        model = Oficio
+        fields = ['motivo']
+
+        widgets = {
+            'motivo': forms.TextInput(attrs={'placeholder': 'Motivo da Solicitação: ex: " Prende-se ao fato de o sindicado estar em gozo de férias'}),}
+
+    def __init__(self, *args, **kwargs):
+        sindicancia_id = kwargs.pop('sindicancia_id', None)  # Pegando o sindicancia_id dos argumentos
+        super(PrazoForm, self).__init__(*args, **kwargs)
