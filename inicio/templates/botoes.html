@@ -89,7 +89,11 @@
 
 
             <button>Juntada</button>
-            <button>Ofício Diverso</button>
+
+             <a href="{% url 'inicio:oficio_diverso' sindicancia.id %}">
+                <button>Ofício Diverso</button>
+            <a/>
+
             <a href="{% url 'inicio:gerar_remessa_dos_autos' sindicancia.id %}">
                 <button>Ofício de Remessa</button>
             </a>

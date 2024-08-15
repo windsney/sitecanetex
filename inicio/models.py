@@ -39,6 +39,7 @@ class Sindicancia (models.Model):
     historico=models.TextField(max_length=2000)
     usuario = models.CharField(max_length=100,default=0)
     funcao_delegante = models.CharField(max_length=100, default='')
+    padrao_oficio = models.CharField(max_length=100, default='')
 
     def __str__(self):
         return self.numero
@@ -120,7 +121,7 @@ class Oficio (models.Model):
 
     tipo=models.CharField(max_length=100)
     nome_destinatario=models.CharField(max_length=100)
-    numero = models.CharField(max_length=10,default=0)
+    numero = models.IntegerField()
     cargofuncao=models.CharField(max_length=100)
     posto=models.CharField(max_length=100)
 

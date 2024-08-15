@@ -91,7 +91,7 @@ class SindicanciaForm(forms.ModelForm):
             'data_portaria', 'data_inicio',
             'dia_recebido','historico', 'funcao_delegante',
             'rua_fato','bairro_fato','cidade_fato','em_servico',
-            'data_fato','hora_fato'
+            'data_fato','hora_fato','padrao_oficio'
 
         ]
 
@@ -100,6 +100,7 @@ class SindicanciaForm(forms.ModelForm):
         'dia_recebido': forms.DateInput(attrs={'type': 'date'}),
         'data_inicio': forms.DateInput(attrs={'type': 'date'}),
         'data_fato': forms.DateInput(attrs={'type': 'date', 'placeholder': 'dd/mm/aaaa'}, format='%d/%m/%Y'),
+        'padrao_oficio': forms.TextInput(attrs={'placeholder': 'EX. 4ºCR/28ºBPM'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -242,3 +243,17 @@ class PrazoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         sindicancia_id = kwargs.pop('sindicancia_id', None)  # Pegando o sindicancia_id dos argumentos
         super(PrazoForm, self).__init__(*args, **kwargs)
+
+
+class Oficio_diversoForm(forms.ModelForm):
+
+    class Meta:
+        model = Oficio
+        fields = ['nome_destinatario','cargofuncao','tipo','motivo']
+
+        widgets = {
+            'motivo': forms.TextInput(attrs={'placeholder': 'Motivo da Solicitação: ex: " Prende-se ao fato de o sindicado estar em gozo de férias'}),}
+
+    def __init__(self, *args, **kwargs):
+        sindicancia_id = kwargs.pop('sindicancia_id', None)  # Pegando o sindicancia_id dos argumentos
+        super(Oficio_diversoForm, self).__init__(*args, **kwargs)

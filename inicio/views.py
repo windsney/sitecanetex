@@ -7,7 +7,7 @@ import os
 import locale
 from django.shortcuts import render, get_object_or_404, redirect
 from django.conf import settings
-from .forms import SindicadoForm,SindicanciaForm,TestemunhaForm,OfendidoForm,UsuarioForm,NotificarTestForm,NotificarOfenForm,NotificarSindForm,PrazoForm
+from .forms import SindicadoForm,SindicanciaForm,TestemunhaForm,OfendidoForm,UsuarioForm,NotificarTestForm,NotificarOfenForm,NotificarSindForm,PrazoForm,Oficio_diversoForm
 from datetime import datetime
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -1528,6 +1528,8 @@ def gerar_remessa_dos_autos(request, sindicancia_id):
     ofendidos = Ofendido.objects.filter(portaria_id=sindicancia_id)
     usuario = request.user
     testemunhas = Testemunha.objects.filter(portaria_id=sindicancia_id)
+    padrao=sindicancia.padrao_oficio
+    ano_corrente = datetime.now().year
 
 
 
@@ -1536,11 +1538,18 @@ def gerar_remessa_dos_autos(request, sindicancia_id):
     # Criar um novo documento
     doc = Document(template_path)
     oficio = Oficio()
+    oficio.numero=numero_oficio(sindicancia_id)
+    oficio.tipo='Ofício de Remessa dos Autos'
 
-    num = Oficio.objects.filter(id_portaria=sindicancia.id).aggregate(Max('numero'))['numero__max']
-    print(num)
 
-    oficio.save()
+
+
+
+
+
+
+
+
 
 
 
@@ -1549,7 +1558,20 @@ def gerar_remessa_dos_autos(request, sindicancia_id):
 
 
     cabecalho(doc,usuario)
-    numero=oficio.numero
+    criar_paragrafo(doc,'')
+
+    #titulo_oficio(doc, usuario, tipo, sindicancia_id)
+
+
+    oficio.id_portaria=sindicancia_id
+    oficio.numero=numero_oficio(sindicancia_id) #oficio é a instancia do model que tem a coluna numero /  ja o numero_oficio é funçao para atribuir  numero sequancial soma 1 no maior numero da tabela
+
+
+    titulo_oficio(doc, usuario, sindicancia_id)
+    ###coloca numero no oficio
+
+
+
 
     char_style = doc.styles.add_style('CustomCharStyle', WD_STYLE_TYPE.CHARACTER)
     char_style.font.name = 'Times New Roman'
@@ -1565,14 +1587,12 @@ def gerar_remessa_dos_autos(request, sindicancia_id):
     ano = datata.year
 
     paragraph1 = doc.add_paragraph()
-    paragraph1 = doc.add_paragraph('')
+
     paragraph1.paragraph_format.space_before = Pt(15)
-    run1 = paragraph1.add_run(f'Ofício nº. {numero}/SIND/7ºCR/2024	       {usuario.cidade}, {dia} de {mes_escrito(mes)} de {ano}.')
-    run1.style = 'CustomCharStyle'
-    paragraph1.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
 
     paragraph1 = doc.add_paragraph()
-    paragraph1 = doc.add_paragraph('')
+
     run1 = paragraph1.add_run('Ao Senhor Ten Cel PM João das Dores.')
     run1.style = 'CustomCharStyle'
     paragraph1.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -1617,7 +1637,7 @@ def gerar_remessa_dos_autos(request, sindicancia_id):
     if len(sindicados) == 1:
 
         datata= sindicancia.data_portaria
-        dia = datata.day
+        dia = f"{datata.day:02d}"
         mes = datata.month
         ano = datata.year
 
@@ -1659,13 +1679,14 @@ def gerar_remessa_dos_autos(request, sindicancia_id):
 
 
 
-
-
     nome_sindicante(doc,usuario,'Respeitosamente')
 
 
     rodape(doc=doc,usuario=usuario)
     nome = f'remessa sind{sindicancia.numero}'
+
+    oficio.save()
+
 
 
 
@@ -1711,6 +1732,7 @@ def criar_oficio(request, sindicancia_id):
 
 
     return render(request, 'botoes.html', context)
+
 @login_required(login_url='/')
 def cadastrar_notificacao_test(request, sindicancia_id, condicao):
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
@@ -1727,13 +1749,6 @@ def cadastrar_notificacao_test(request, sindicancia_id, condicao):
         if form.is_valid():
             oficio=form.save(commit=False)
             oficio.id_portaria=sindicancia.id
-
-            try:
-                num = Oficio.objects.filter(id_portaria=sindicancia.id).aggregate(Max('numero'))['numero__max']
-                oficio.numero = int(num) + 1
-            except:
-                num = Oficio.objects.aggregate(Max('numero'))['numero__max']
-                oficio.numero = int(num) + 1
 
 
 
@@ -1777,6 +1792,10 @@ def cadastrar_notificacao_test(request, sindicancia_id, condicao):
             cabecalho(doc, usuario)
 
             criar_paragrafo(doc, '')
+            oficio.id_portaria=sindicancia_id
+            oficio.numero=numero_oficio(sindicancia_id)
+
+            titulo_oficio(doc,usuario, sindicancia_id)
             criar_paragrafo(doc, '')
 
             data_original = f'{sindicancia.data_portaria}'
@@ -1808,6 +1827,7 @@ def cadastrar_notificacao_test(request, sindicancia_id, condicao):
             )
 
             criar_paragrafo(doc, f'{nome_notificado}/ {cargoouendereco}')
+
             criar_paragrafo(doc, f'Ref: Portaria nº{sindicancia.numero}, datada de {data_formatada}.')
             criar_paragrafo(doc, f'Assunto: {assunto}')
             criar_paragrafo(doc, '')
@@ -1849,9 +1869,12 @@ def Oficio_prazo (request, sindicancia_id, condicao):
 
 
     if request.method == 'POST':
+
+
         if condicao == 'prorrogacao':
             form = PrazoForm(request.POST, sindicancia_id=sindicancia_id)
             condicao='Prorrogação'
+
 
         elif condicao == 'dilacao':
             form = PrazoForm(request.POST, sindicancia_id=sindicancia_id)
@@ -1862,16 +1885,9 @@ def Oficio_prazo (request, sindicancia_id, condicao):
         if form.is_valid():
             oficio = form.save(commit=False)
 
-            try:
-                num = Oficio.objects.filter(id_portaria=sindicancia.id).aggregate(Max('numero'))['numero__max']
-                oficio.numero = int(num) + 1
-            except:
-                num = Oficio.objects.aggregate(Max('numero'))['numero__max']
-                oficio.numero = int(num) + 1
 
-            oficio.numero = int(num) + 1
             oficio.tipo= f'Solicitação de {condicao}'
-            oficio.save()
+
 
             motivo = form.cleaned_data.get('motivo')  # Já é um objeto datetime.date
 
@@ -1885,34 +1901,58 @@ def Oficio_prazo (request, sindicancia_id, condicao):
 
             criar_paragrafo(doc, '')
             criar_paragrafo(doc, '')
+            titulo_oficio(doc, usuario, sindicancia_id)
+            criar_paragrafo(doc, '')
 
+
+
+            oficio.numero=numero_oficio(sindicancia_id)
+            oficio.id_portaria=sindicancia_id
+            oficio.nome_destinatario= sindicancia.delegante
             data_original = f'{sindicancia.data_portaria}'
             data_obj = datetime.strptime(data_original, '%Y-%m-%d')
             data_formatada = data_obj.strftime('%d.%m.%y')
+
+            if condicao == 'Prorrogação':
+
+                texto = f'Solicito-vos, nos termos do Art 1º parágrafo 1º da portaria 01/QCG/CORREGPM de 22.01.2018, a Prorrogação de 20(vinte) dias, para a conclusão dos trabalhos, da Sindicância designado por Portaria nº{sindicancia.numero}, datada de {data_formatada}.'
+
+
+            elif condicao == 'Dilação':
+                texto = f'Solicito-vos, nos termos do Art 1º parágrafo 2º da portaria 01/QCG/CORREGPM de 22.01.2018, a Dilação de 30(trinta) dias, para a conclusão dos trabalhos, da Sindicância designado por Portaria nº{sindicancia.numero}, datada de {data_formatada}.'
+
+            elif condicao == 'Sobrestamento':
+                texto = f'Solicito-vos, nos termos do Art 1º parágrafo 3º da portaria 01/QCG/CORREGPM de 22.01.2018, o Sobrestamento de 30(trinta) dias, para a conclusão dos trabalhos, da Sindicância designado por Portaria nº{sindicancia.numero}, datada de {data_formatada}.'
+
+
+
 
 
 
             assunto = 'Solicitação (FAZ)'
 
-            texto_solicitacao = (
-                f'Notifico Vossa Senhoria a comparecer no {usuario.unidade}, {usuario.rua}, nº {usuario.numero},'
-                f'Bairro: {usuario.bairro},Cidade: {usuario.cidade}, no dia , fins de prestar esclarecimentos na condição de {condicao} '
-                f'na Sindicância Portaria nº {sindicancia.numero}, de {data_formatada}, em referência a fim de ser inquirido '
-                f'sobre os fatos narrados na portaria. {motivo}Dúvidas entrar em contato por meio do telefone: '
-                f'{usuario.telefone} {usuario.posto} {usuario.nome_completo}.'
-            )
+
 
             #criar_paragrafo(doc, f'{nome_notificado}')
-            criar_paragrafo(doc, f'Ref: Portaria nº{sindicancia.numero}, datada de {data_formatada}.')
+
+            criar_paragrafo(doc, f'Ao Senhor {sindicancia.posto_delegante} {oficio.nome_destinatario} -')
+            criar_paragrafo(doc, f'{sindicancia.funcao_delegante}')
             criar_paragrafo(doc, f'Assunto: {assunto}')
+            criar_paragrafo(doc, f'Ref: Portaria nº{sindicancia.numero}, datada de {data_formatada}.')
             criar_paragrafo(doc, '')
             criar_paragrafo(doc, '')
-            criar_paragrafo(doc, f"{texto_solicitacao}", lado='justificado')
+            criar_paragrafo(doc, 'Senhor Comandante,',iniciar=120)
             criar_paragrafo(doc, '')
+            criar_paragrafo(doc, f"{texto}", lado='justificado')
+            criar_paragrafo(doc, f'Outrossim, informo que tal solicitação prende-se ao fato de {motivo}.',lado='justificado')
+
             criar_paragrafo(doc, '')
 
-            nome_sindicante(doc, usuario, 'Atenciosamente')
+            nome_sindicante(doc, usuario, 'Respeitosamente')
             rodape(doc, usuario)
+
+            form.save()
+            oficio.save()
 
             # Gerar o arquivo para download
             response = HttpResponse(
@@ -1921,6 +1961,7 @@ def Oficio_prazo (request, sindicancia_id, condicao):
             doc.save(response)
 
             form.save()
+            oficio.save()
             return response
     else:
         if condicao == 'prorrogacao':
@@ -1934,8 +1975,78 @@ def Oficio_prazo (request, sindicancia_id, condicao):
 
 
 
+@login_required(login_url='/')
+def Oficio_diverso(request, sindicancia_id):
+    sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
+    usuario = request.user
+
+    if request.method == 'POST':
+        form = Oficio_diversoForm(request.POST, sindicancia_id=sindicancia_id)
+        condicao = 'Sobrestamento'
+        if form.is_valid():
+            oficio = form.save(commit=False)
+            oficio.tipo = f'Solicitação de {condicao}'
+            oficio.motivo = form.cleaned_data.get('motivo')
+            oficio.cargofuncao = form.cleaned_data.get('cargofuncao')
+
+            # Criar o documento .docx
+            template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'relatorio_modelo.docx')
+            doc = Document(template_path)
+
+
+            #data_inquiricao = form.cleaned_data.get('data')  # Já é um objeto datetime.date
+
+
+            # Preencher o documento com os dados necessários
+            cabecalho(doc, usuario)
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, '')
+            titulo_oficio(doc, usuario, sindicancia_id)
+            criar_paragrafo(doc, '')
+
+            oficio.numero = numero_oficio(sindicancia_id)
+            oficio.id_portaria = sindicancia_id
+            oficio.nome_destinatario = form.cleaned_data.get('nome_destinatario')
+            data_original = f'{sindicancia.data_portaria}'
+            data_obj = datetime.strptime(data_original, '%Y-%m-%d')
+            data_formatada = data_obj.strftime('%d.%m.%y')
+
+            texto = f'Solicito-vos, nos termos do Art 1º parágrafo 1º da portaria 01/QCG/CORREGPM de 22.01.2018, a Prorrogação de 20(vinte) dias, para a conclusão dos trabalhos, da Sindicância designado por Portaria nº{sindicancia.numero}, datada de {data_formatada}.'
+
+            assunto = 'Solicitação (FAZ)'
+
+            criar_paragrafo(doc, f'A(o) Senhor(a)  {oficio.nome_destinatario} -')
+            criar_paragrafo(doc, f'{oficio.cargofuncao}')
+            criar_paragrafo(doc, f'Assunto: {assunto}')
+            criar_paragrafo(doc, f'Ref: Portaria nº{sindicancia.numero}, datada de {data_formatada}.')
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, f'Senhor(a) {oficio.cargofuncao},', iniciar=120)
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, f"{oficio.motivo}", lado='justificado')
+
+            criar_paragrafo(doc, '')
+
+            nome_sindicante(doc, usuario, 'Respeitosamente')
+            rodape(doc, usuario)
+
+            form.save()
+            oficio.save()
+
+            nome = f'Ofício nº {oficio.numero}'
+            return gera_word(doc, nome)
+    else:
+        # Inicializa o formulário para requisições GET
+        form = Oficio_diversoForm(sindicancia_id=sindicancia_id)
+
+    return render(request, 'oficio_diverso.html', {'form': form, 'usuario': usuario})
+
+
+
+
+
 #______________________funções para construção____________________________________________________________
-def criar_paragrafo(doc,texto,antes=1,depois=1,lado=0):
+def criar_paragrafo(doc,texto,antes=1,depois=1,lado=0,iniciar=0):
 
     dili_paragraph = doc.add_paragraph()
     dili_run = dili_paragraph.add_run(f'{texto}')
@@ -1957,6 +2068,7 @@ def criar_paragrafo(doc,texto,antes=1,depois=1,lado=0):
         # dili_paragraph.paragraph_format.line_spacing = Pt(12)
 
     else:
+        dili_paragraph.paragraph_format.first_line_indent = Pt(iniciar)
         dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
         dili_run.font.name = 'Times New Roman'
         dili_run.font.size = Pt(12)
@@ -2084,5 +2196,41 @@ def gera_word(doc,nome):
         return HttpResponse(f"Erro ao salvar o documento: {e}", status=500)
 
     return response
+
+def numero_oficio(sindicancia_id):
+    sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
+    oficio = Oficio()
+
+    max_numero_oficio = Oficio.objects.filter(id_portaria=sindicancia.id).aggregate(Max('numero'))['numero__max']
+
+    # Definir o próximo número de ofício
+    if max_numero_oficio is not None:
+        novo_numero_oficio = int(max_numero_oficio) + 1
+        numero=novo_numero_oficio
+
+    else:
+        novo_numero_oficio = 1  # Se não houver ofício, começar com 1
+        numero=novo_numero_oficio
+
+    return novo_numero_oficio
+
+
+def titulo_oficio(doc,usuario,sindicancia_id):
+    sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
+
+    numero= numero_oficio(sindicancia_id)
+
+
+
+    ano_corrente = datetime.now().year
+    dia=f"{datetime.now().day:02d}"
+    mes= datetime.now().month
+
+    padrao =sindicancia.padrao_oficio
+    criar_paragrafo(doc,f'Ofício nº.{numero}/SIND/{padrao}/{ano_corrente}	       {usuario.cidade}, {dia} de {mes_escrito(mes)} de {ano_corrente}.')
+
+
+
+
 
 

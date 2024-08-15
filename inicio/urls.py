@@ -35,6 +35,7 @@ urlpatterns = [
     path('sindicancia/prazo/<int:sindicancia_id>/<str:condicao>/', inicio.views.Oficio_prazo, name='prorrogacao'),
     path('sindicancia/prazo/<int:sindicancia_id>/<str:condicao>/', inicio.views.Oficio_prazo, name='dilacao'),
     path('sindicancia/prazo/<int:sindicancia_id>/<str:condicao>/', inicio.views.Oficio_prazo, name='sobrestamento'),
+    path('sindicancia/oficio_verso/<int:sindicancia_id>', inicio.views.Oficio_diverso, name='oficio_diverso'),
 
 
     path('sindicancia/<int:sindicancia_id>/remessa', inicio.views.gerar_remessa_dos_autos, name='gerar_remessa_dos_autos'),
