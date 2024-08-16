@@ -234,7 +234,18 @@
 
         <div class="button-container">
 
+
+             <a href="{% url 'inicio:autuacao' sindicancia.id %}">
+                <button>Autuação</button>
+            </a>
+
+            <a href="{% url 'inicio:termo_abertura' sindicancia.id %}">
+                <button>Termo Abertura</button>
+            </a>
+
             <button>Citação</button>
+
+
 
             <a href="{% url 'inicio:relatorio_sind' sindicancia.id %}">
                 <button>Gerar Relatório</button>

@@ -257,3 +257,17 @@ class Oficio_diversoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         sindicancia_id = kwargs.pop('sindicancia_id', None)  # Pegando o sindicancia_id dos argumentos
         super(Oficio_diversoForm, self).__init__(*args, **kwargs)
+
+
+class JuntadaaForm(forms.ModelForm):
+
+    class Meta:
+        model = Oficio
+        fields = ['motivo']
+
+        widgets = {
+            'motivo': forms.TextInput(attrs={'placeholder': 'O que foi Juntado para lançar no  relatório. Ex: Escala de Serviço'}),}
+
+    def __init__(self, *args, **kwargs):
+        sindicancia_id = kwargs.pop('sindicancia_id', None)  # Pegando o sindicancia_id dos argumentos
+        super(JuntadaaForm, self).__init__(*args, **kwargs)

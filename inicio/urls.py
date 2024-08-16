@@ -28,6 +28,7 @@ urlpatterns = [
 
     ####Botoes########################################
     path('sindicancia/<int:sindicancia_id>/iniciot', inicio.views.gerar_inicio_dos_trabalhos, name='inicio_dos_trabalhos'),
+    path('sindicancia/<int:sindicancia_id>/autuacao', inicio.views.Autuacao, name='autuacao'),
     path('sindicancia/<int:sindicancia_id>/relatorio_sind', inicio.views.gerar_relatorio, name='relatorio_sind'),
     path('sindicancia/notificar/<int:sindicancia_id>/<str:condicao>/', inicio.views.cadastrar_notificacao_test, name='btn_test'),
     path('sindicancia/notificar/<int:sindicancia_id>/<str:condicao>/', inicio.views.cadastrar_notificacao_test, name='btn_ofen'),
@@ -36,6 +37,7 @@ urlpatterns = [
     path('sindicancia/prazo/<int:sindicancia_id>/<str:condicao>/', inicio.views.Oficio_prazo, name='dilacao'),
     path('sindicancia/prazo/<int:sindicancia_id>/<str:condicao>/', inicio.views.Oficio_prazo, name='sobrestamento'),
     path('sindicancia/oficio_verso/<int:sindicancia_id>', inicio.views.Oficio_diverso, name='oficio_diverso'),
+    path('sindicancia/juntada/<int:sindicancia_id>', inicio.views.Juntada, name='juntada'),
 
 
     path('sindicancia/<int:sindicancia_id>/remessa', inicio.views.gerar_remessa_dos_autos, name='gerar_remessa_dos_autos'),

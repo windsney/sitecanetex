@@ -55,9 +55,7 @@
         <h2>Página de Botões</h2>
         <div class="button-container">
 
-            <a href="{% url 'inicio:termo_abertura' sindicancia.id %}">
-                <button>Termo Abertura</button>
-            </a>
+
             <a href="{% url 'inicio:inicio_dos_trabalhos' sindicancia.id %}">
                 <button>Ofício de Início dos Trabalhos</button>
             </a>
@@ -88,7 +86,10 @@
             <a/>
 
 
-            <button>Juntada</button>
+            <a href="{% url 'inicio:juntada' sindicancia.id %}">
+                 <button>Juntada</button>
+            <a/>
+
 
              <a href="{% url 'inicio:oficio_diverso' sindicancia.id %}">
                 <button>Ofício Diverso</button>

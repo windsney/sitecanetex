@@ -7,7 +7,7 @@ import os
 import locale
 from django.shortcuts import render, get_object_or_404, redirect
 from django.conf import settings
-from .forms import SindicadoForm,SindicanciaForm,TestemunhaForm,OfendidoForm,UsuarioForm,NotificarTestForm,NotificarOfenForm,NotificarSindForm,PrazoForm,Oficio_diversoForm
+from .forms import SindicadoForm,SindicanciaForm,TestemunhaForm,OfendidoForm,UsuarioForm,NotificarTestForm,NotificarOfenForm,NotificarSindForm,PrazoForm,Oficio_diversoForm,JuntadaaForm
 from datetime import datetime
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -2042,6 +2042,262 @@ def Oficio_diverso(request, sindicancia_id):
     return render(request, 'oficio_diverso.html', {'form': form, 'usuario': usuario})
 
 
+def Juntada(request, sindicancia_id):
+    sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
+    usuario = request.user
+
+    if request.method == 'POST':
+        form = JuntadaaForm(request.POST, sindicancia_id=sindicancia_id)
+
+        if form.is_valid():
+            oficio = form.save(commit=False)
+            oficio.tipo = 'Juntada'
+            oficio.motivo = form.cleaned_data.get('motivo')
+            oficio.cargofuncao = ''
+            oficio.numero=1
+
+
+            # Criar o documento .docx
+            template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'relatorio_modelo.docx')
+            doc = Document(template_path)
+
+            cabecalho(doc, usuario)
+            criar_paragrafo(doc,'')
+            criar_paragrafo(doc, '')
+
+
+            report_title = doc.add_paragraph("JUNTADA")
+            report_title.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            run = report_title.runs[0]
+            run.font.name = 'Times New Roman'
+            run.font.size = Pt(12)
+            run.bold = True
+            run.underline = False
+            r = run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+            # Adicionar espaçamento duplo antes do título "Relatório"
+            report_title_format = report_title.paragraph_format
+            report_title_format.space_after = Pt(24)  # Espaço duplo
+            report_title_format.space_before = Pt(24)  # Espaço duplo
+
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, '')
+
+            datata = datetime.today()
+            dia = datata.day
+            mes = datata.month
+            ano = datata.year
+
+
+
+            texto=(f'{dia_escrito(dia)} dias do mês de {mes_escrito(mes)} do ano de {ano_escrito(ano)}, nesta cidade de {usuario.cidade} , Estado de Mato Grosso, faço juntada aos presentes autos de Sindicância dos documentos de Fls. ........... a .............. , do que para constar;')
+            criar_paragrafo(doc, f'{texto}',lado='justificado')
+            criar_paragrafo(doc, '')
+            criar_paragrafo(doc, '')
+            nome_sindicante(doc, usuario, '')
+            rodape(doc, usuario)
+
+            form.save()
+            oficio.save()
+
+            nome = f'Juntada dia {dia}-{mes}'
+            return gera_word(doc, nome)
+    else:
+        # Inicializa o formulário para requisições GET
+        form = JuntadaaForm(sindicancia_id=sindicancia_id)
+
+    return render(request, 'juntada.html', {'form': form, 'usuario': usuario})
+
+
+
+@login_required(login_url='/')
+def Autuacao(request, sindicancia_id):
+    template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'autuacao.docx')
+
+    sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
+    sindicados = sindicancia.sindicados.all()
+    usuario = request.user
+    doc = DocxTemplate(template_path)  # DOCUMENTO  EXEMPLO#
+
+
+    #dia_inicio = sindicancia.data_inicio
+
+    mes_ini = sindicancia.data_inicio.month
+    mesescritoini = mes_escrito(mes_ini)
+    diaini = sindicancia.data_inicio.strftime('%d') if sindicancia.data_inicio else ''
+    anoini = sindicancia.data_inicio.year
+
+    dia_inicio = f'{diaini} de {mesescritoini} de {anoini}'
+
+
+    posto_delegante = sindicancia.posto_delegante
+    nome_delegante = sindicancia.delegante
+    funcao_delegante = sindicancia.funcao_delegante
+    portaria = sindicancia.numero
+
+    #datada = sindicancia.data_portaria
+    mes_port= sindicancia.data_portaria.month
+    mesescritoport=mes_escrito(mes_port)
+    diaport=sindicancia.data_portaria.strftime('%d') if sindicancia.data_portaria else ''
+    anoport=sindicancia.data_portaria.year
+
+
+    datada= f'{diaport} de {mesescritoport} de {anoport}'
+    cidade = usuario.cidade
+    unidade = usuario.unidade
+    cr = usuario.cr
+    unidade1 = usuario.unidade.upper()
+    cr1 = usuario.cr.upper()
+    rua = usuario.rua
+    bairro = usuario.bairro
+    numero = usuario.numero
+    cep = usuario.cep
+    email = usuario.email_bpm
+    telefone= usuario.telefone
+
+
+
+
+    #dia_recebido = sindicancia.dia_recebido
+    mes_rec = sindicancia.dia_recebido.month
+    mesescritorec = mes_escrito(mes_rec)
+    diarec = sindicancia.dia_recebido.strftime('%d') if sindicancia.dia_recebido else ''
+    anorec = sindicancia.dia_recebido.year
+
+    dia_recebido = f'{diarec} de {mesescritorec} de {anorec}'
+
+
+
+    nome_delegada = sindicancia.delegada
+    posto_delegada = sindicancia.posto_delegada
+    rg_delegada = sindicancia.rg_delegada
+    context = {  # VARIÁ
+        "dia_inicio": f"{dia_inicio}",
+        "anoini": f"{anoini}",
+        "cr": f"{cr}",
+        "cr1": f"{cr1}",
+        "rua": f"{rua}",
+        "bairro": f"{bairro}",
+        "numero": f"{numero}",
+        "telefone": f"{telefone}",
+        "cep": f"{cep}",
+        "email": f"{email}",
+        "cidade": f"{cidade}",
+        "unidade": f"{unidade}",
+        "unidade1": f"{unidade1}",
+        "posto_delegante": f"{posto_delegante}",
+        "nome_delegante": f"{nome_delegante}",
+        "funcao_delegante": f"{funcao_delegante}",
+        "portaria": f"{portaria}",
+        "datada": f"{datada}",
+        "dia_recebido": f"{dia_recebido}",
+        "nome_delegada": f"{nome_delegada}",
+        "posto_delegada": f"{posto_delegada}",
+        "rg_delegada": f"{rg_delegada}",
+
+    }
+    doc.render(context)
+
+    doc.save("documento_com_tpl.docx")
+
+    doc = Document("documento_com_tpl.docx")
+
+    # Adicionando parágrafos ou outras formatações
+    doc.add_paragraph("Este parágrafo foi adicionado com python-docx após o template ser preenchido.")
+    doc.add_paragraph("Outro conteúdo personalizado.")
+
+    # Salva o documento final
+    sindicado_paragraph = doc.add_paragraph()
+    sindicado_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    sindicado_paragraph.paragraph_format.first_line_indent = Pt(80)
+    sindicado_run = sindicado_paragraph.add_run("SINDICANTE: ")
+    sindicado_run.font.name = 'Times New Roman'
+    sindicado_run.font.size = Pt(12)
+    sindicado_run.bold = True  # Deixar a palavra "Sindicado" em negrito
+    r = sindicado_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    sindicado_run = sindicado_paragraph.add_run(f"{usuario.nome_completo.upper()} - {usuario.posto.upper()}")
+    sindicado_run.font.name = 'Times New Roman'
+
+    sindicado_run.font.size = Pt(12)
+    r = sindicado_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+
+
+    if len(sindicados)==1: # verifica se tem um ou mais sindicados pra  colocar no plural se for o caso
+
+        sindicado_paragraph = doc.add_paragraph()
+        sindicado_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        sindicado_paragraph.paragraph_format.first_line_indent = Pt(80)
+        sindicado_run = sindicado_paragraph.add_run("SINDICADO: ")
+        sindicado_run.font.name = 'Times New Roman'
+        sindicado_run.font.size = Pt(12)
+        sindicado_run.bold = True  # Deixar a palavra "Sindicado" em negrito
+        r = sindicado_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+    else:
+        sindicado_paragraph = doc.add_paragraph()
+        sindicado_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+        sindicado_paragraph.paragraph_format.first_line_indent = Pt(80)
+        sindicado_run = sindicado_paragraph.add_run("SINDICADOS: ")
+        sindicado_run.font.name = 'Times New Roman'
+        sindicado_run.font.size = Pt(12)
+        sindicado_run.bold = True  # Deixar a palavra "Sindicado" em negrito
+        r = sindicado_run._element
+        r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    for index, sindicado in enumerate(sindicados):
+        if index == 0:
+            sindicado_run = sindicado_paragraph.add_run(f"{sindicado.nome.upper()} - {sindicado.posto_sindicado.upper()}")
+            sindicado_run.font.name = 'Times New Roman'
+
+            sindicado_run.font.size = Pt(12)
+            r = sindicado_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+        else:
+
+            sindicado_nome_paragraph = doc.add_paragraph()
+            sindicado_nome_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+            sindicado_nome_paragraph.paragraph_format.left_indent = Pt(163)
+            sindicado_nome_run = sindicado_nome_paragraph.add_run(f"{sindicado.nome.upper()} - {sindicado.posto_sindicado.upper()}")
+            sindicado_nome_run.font.name = 'Times New Roman'
+            sindicado_nome_run.font.size = Pt(12)
+            r = sindicado_nome_run._element
+            r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    sindicado_paragraph = doc.add_paragraph('')
+    sindicado_paragraph = doc.add_paragraph('')
+    sindicado_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    sindicado_paragraph.paragraph_format.first_line_indent = Pt(105)
+    sindicado_run = sindicado_paragraph.add_run("OBJETO: ")
+    sindicado_run.font.name = 'Times New Roman'
+    sindicado_run.font.size = Pt(12)
+    sindicado_run.bold = True  # Deixar a palavra "OBJETO" em negrito
+    r = sindicado_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(f'{sindicancia.historico}')
+    dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    dili_paragraph.paragraph_format.left_indent = Pt(163)
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    r = dili_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+
+
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    response['Content-Disposition'] = f'attachment; filename= Autuação {portaria}.docx'
+    doc.save(response)
+
+    return response
+
+
 
 
 
@@ -2104,7 +2360,7 @@ def nome_sindicante(doc,usuario,tratamento):
 
 
     paragraph1.paragraph_format.first_line_indent = Pt(120)
-    run1 = paragraph1.add_run(f'{tratamento},')
+    run1 = paragraph1.add_run(f'{tratamento}')
 
 
     paragraph1.paragraph_format.space_before = Pt(15)
