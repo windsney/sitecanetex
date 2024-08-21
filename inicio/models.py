@@ -127,7 +127,7 @@ class Oficio (models.Model):
 
     local=models.CharField(max_length=100)
 
-    motivo=models.CharField(max_length=100)
+    motivo=models.CharField(max_length=10000)
     endereco=models.CharField(max_length=100,default=0)
     telefone=models.CharField(max_length=100,default=0)
     texto=models.CharField(max_length=1000,default=0)

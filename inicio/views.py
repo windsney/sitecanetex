@@ -366,6 +366,8 @@ def gerar_declaracao_sindicado(request,sindicancia_id,id):
     sindicado = get_object_or_404(Sindicado, id=id)
     sindicancia = get_object_or_404(Sindicancia, pk=sindicancia_id)
     template_path = os.path.join(settings.BASE_DIR, 'inicio/templates', 'declaracao_sindicado.docx')
+    usuario = request.user
+
 
 
 
@@ -395,9 +397,9 @@ def gerar_declaracao_sindicado(request,sindicancia_id,id):
 
     hora_inicio=sindicado.hora_inicio
     hora_fim=sindicado.hora_fim
-    sindicante= sindicancia.delegada
-    posto_sindicante=sindicancia.posto_delegada
-    rg_sindicante= sindicancia.rg_delegada
+    sindicante= usuario.nome_completo
+    posto_sindicante=usuario.posto
+    rg_sindicante= usuario.rgpm
     cpf=sindicado.cpf
     email=sindicado.email
     telefone= sindicado.telefone
@@ -424,17 +426,17 @@ def gerar_declaracao_sindicado(request,sindicancia_id,id):
 
     naturalidade=sindicado.naturalidade
 
-    cr= sindicancia.unidade.upper()
+    cr= usuario.cr.upper()
 
-    lotacao_delegada= sindicancia.lotacao_delegada
-    lotacao_delegada1 = sindicancia.lotacao_delegada.upper()
-    rua_quartel=sindicancia.rua_quartel
-    numero_quartel=sindicancia.numero_quartel
-    bairro_quartel=sindicancia.bairro_quartel
-    cidade_quartel=sindicancia.cidade_quartel
-    cep_quartel=sindicancia.cep_quartel
-    telefone_quartel=sindicancia.telefone_quartel
-    email_quartel=sindicancia.email_quartel
+    lotacao_delegada= usuario.unidade
+    lotacao_delegada1 = usuario.unidade.upper()
+    rua_quartel=usuario.rua
+    numero_quartel=usuario.numero
+    bairro_quartel=usuario.bairro
+    cidade_quartel=usuario.cidade
+    cep_quartel=usuario.cep
+    telefone_quartel=usuario.telefone
+    email_quartel=usuario.email_bpm
 
 
     context = {  # VARIÁ
@@ -1812,8 +1814,10 @@ def cadastrar_notificacao_test(request, sindicancia_id, condicao):
                 cargoouendereco=endereco_testemunha
             elif condicao == 'ofen':
                 condicao = 'Ofendido'
+                cargoouendereco = endereco_testemunha
             else:
                 condicao = 'Sindicado'
+                cargoouendereco = endereco_testemunha
 
             assunto = 'Solicitação (FAZ)'
 
@@ -2203,9 +2207,6 @@ def Autuacao(request, sindicancia_id):
 
     doc = Document("documento_com_tpl.docx")
 
-    # Adicionando parágrafos ou outras formatações
-    doc.add_paragraph("Este parágrafo foi adicionado com python-docx após o template ser preenchido.")
-    doc.add_paragraph("Outro conteúdo personalizado.")
 
     # Salva o documento final
     sindicado_paragraph = doc.add_paragraph()
@@ -2271,7 +2272,7 @@ def Autuacao(request, sindicancia_id):
     sindicado_paragraph = doc.add_paragraph('')
     sindicado_paragraph = doc.add_paragraph('')
     sindicado_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-    sindicado_paragraph.paragraph_format.first_line_indent = Pt(105)
+    sindicado_paragraph.paragraph_format.first_line_indent = Pt(82)
     sindicado_run = sindicado_paragraph.add_run("OBJETO: ")
     sindicado_run.font.name = 'Times New Roman'
     sindicado_run.font.size = Pt(12)
@@ -2282,10 +2283,63 @@ def Autuacao(request, sindicancia_id):
     dili_paragraph = doc.add_paragraph()
     dili_run = dili_paragraph.add_run(f'{sindicancia.historico}')
     dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    dili_paragraph.paragraph_format.left_indent = Pt(163)
+    dili_paragraph.paragraph_format.left_indent = Pt(140)
     dili_run.font.name = 'Times New Roman'
     dili_run.font.size = Pt(12)
     r = dili_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    dili_paragraph = doc.add_paragraph()
+    dili_paragraph = doc.add_paragraph()
+    dili_paragraph = doc.add_paragraph()
+    dili_run = dili_paragraph.add_run(f'AUTUAÇÃO')
+    dili_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    dili_run.bold = True
+    dili_run.italic = True
+    dili_paragraph.paragraph_format.left_indent = Pt(100)
+
+    dili_run.font.name = 'Times New Roman'
+    dili_run.font.size = Pt(12)
+    r = dili_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    sindicado_nome_paragraph = doc.add_paragraph()
+    sindicado_nome_paragraph = doc.add_paragraph()
+    sindicado_nome_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    sindicado_nome_paragraph.paragraph_format.left_indent = Pt(82)
+    sindicado_nome_paragraph.paragraph_format.first_line_indent = Pt(50)
+    sindicado_nome_run = sindicado_nome_paragraph.add_run(f"{sindicancia.historico}")
+    sindicado_nome_run.font.name = 'Times New Roman'
+    sindicado_nome_run.font.size = Pt(12)
+    r = sindicado_nome_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    sindicado_nome_paragraph = doc.add_paragraph()
+    sindicado_nome_paragraph = doc.add_paragraph()
+    sindicado_nome_paragraph = doc.add_paragraph()
+    sindicado_nome_paragraph = doc.add_paragraph()
+    sindicado_nome_paragraph = doc.add_paragraph()
+    sindicado_nome_paragraph = doc.add_paragraph()
+    sindicado_nome_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+
+    sindicado_nome_paragraph.paragraph_format.first_line_indent = Pt(90)
+    sindicado_nome_run = sindicado_nome_paragraph.add_run(f"{usuario.nome_completo.upper()}- {usuario.posto.upper()}")
+    sindicado_nome_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    sindicado_nome_run.bold = True
+    sindicado_nome_run.italic = True
+    sindicado_nome_run.font.name = 'Times New Roman'
+    sindicado_nome_run.font.size = Pt(12)
+    r = sindicado_nome_run._element
+    r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+
+    sindicado_nome_paragraph = doc.add_paragraph()
+    sindicado_nome_paragraph.paragraph_format.first_line_indent = Pt(100)
+    sindicado_nome_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    sindicado_nome_run = sindicado_nome_paragraph.add_run("SINDICANTE")
+    sindicado_nome_run.italic = True
+    sindicado_nome_run.font.name = 'Times New Roman'
+    sindicado_nome_run.font.size = Pt(12)
+    r = sindicado_nome_run._element
     r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
 
 
