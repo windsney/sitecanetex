@@ -1387,6 +1387,8 @@ def gerar_relatorio(request, sindicancia_id):
     r = dili_run._element
     r.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
 
+    rodape(doc=doc, usuario=usuario)
+
 
     # Nome do arquivo
     nome = f'Relatorio sind{sindicancia.numero}'
@@ -2483,7 +2485,7 @@ def rodape(doc,usuario):
     footer_paragraph.paragraph_format.space_after = Pt(0)
 
     footer_paragraph = footer.add_paragraph()
-    footer_run = footer_paragraph.add_run(f"e-mail: {usuario.email}")
+    footer_run = footer_paragraph.add_run(f"e-mail: {usuario.email_bpm}")
     footer_run.font.name = 'Times New Roman'
     footer_run.font.size = Pt(12)
     footer_run.font.color.rgb = RGBColor(0, 0, 0)  # Cor preta
