@@ -322,9 +322,9 @@ def gerar_termo_abertura(request, sindicancia_id):
     telefone = usuario.telefone
     cep=usuario.cep
     email=usuario.email_bpm
-    nome_delegada = sindicancia.delegada
-    posto_delegada = sindicancia.posto_delegada
-    rg_delegada = sindicancia.rg_delegada
+    nome_delegada = usuario.nome_completo
+    posto_delegada = usuario.posto
+    rg_delegada = usuario.rgpm
     context = {  # VARIÁ
         "dia": f"{dia}",
         "mes": f"{mes}",
@@ -2310,7 +2310,9 @@ def Autuacao(request, sindicancia_id):
     sindicado_nome_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     sindicado_nome_paragraph.paragraph_format.left_indent = Pt(82)
     sindicado_nome_paragraph.paragraph_format.first_line_indent = Pt(50)
-    sindicado_nome_run = sindicado_nome_paragraph.add_run(f"{sindicancia.historico}")
+    dia= sindicancia.data_inicio.day
+    texto=f'{dia_escrito(dia)} dias do mês de {mes_escrito(mes_ini)} do ano de {anoini}, nesta cidade de {usuario.cidade} Estado de Mato Grosso no Quartel do {usuario.unidade}, autuo a Portaria nº {sindicancia.numero}, de {sindicancia.data_portaria.day} de {mes_escrito(sindicancia.data_portaria.month)} de {sindicancia.data_portaria.year}, e demais documentos que a esta junto me foram entregues. Para constar, eu, {usuario.nome_completo} - {usuario.posto} digitei e assinei este termo. '
+    sindicado_nome_run = sindicado_nome_paragraph.add_run(f"{texto}")
     sindicado_nome_run.font.name = 'Times New Roman'
     sindicado_nome_run.font.size = Pt(12)
     r = sindicado_nome_run._element
