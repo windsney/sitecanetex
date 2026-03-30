@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sind Fácil - Cadastro de Investigado</title>
+    <style>
+        body {
+            background-color: #D8BFD8; /* Fundo roxo claro */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #4B0082; /* Cor do título */
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            color: #4B0082;
+        }
+        input, select, textarea {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            background-color: #4B0082; /* Cor do botão */
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 15px;
+        }
+        input[type="submit"]:hover {
+            background-color: #6A0DAD;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Sind Fácil - Cadastro de Investigado</h2>
+        <h3>{{lista_sindicancia}}</h3>
+        <form action="#" method="post">
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" name="nome" maxlength="100" required>
+
+            <label for="rgpm">RGPM</label>
+            <input type="text" id="rgpm" name="rgpm" maxlength="100" required>
+
+            <label for="cpf">CPF</label>
+            <input type="text" id="cpf" name="cpf" maxlength="100" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" maxlength="100" required>
+
+            <label for="endereco">Endereço</label>
+            <input type="text" id="endereco" name="endereco" maxlength="100" required>
+
+            <label for="posto_sindicado">Posto Sindicado</label>
+            <input type="text" id="posto_sindicado" name="posto_sindicado" maxlength="100" required>
+
+            <label for="pai">Pai</label>
+            <input type="text" id="pai" name="pai" maxlength="100" required>
+
+            <label for="mae">Mãe</label>
+            <input type="text" id="mae" name="mae" maxlength="100" required>
+
+            <label for="telefone">Telefone</label>
+            <input type="text" id="telefone" name="telefone" maxlength="50" required>
+
+            <label for="data_nascimento">Data de Nascimento</label>
+            <input type="date" id="data_nascimento" name="data_nascimento" required>
+
+            <label for="naturalidade">Naturalidade</label>
+            <input type="text" id="naturalidade" name="naturalidade" maxlength="100" required>
+
+            <label for="declaracao">Declaração</label>
+            <textarea id="declaracao" name="declaracao" maxlength="2000" rows="5" required></textarea>
+
+            <input type="submit" value="Cadastrar">
+        </form>
+    </div>
+</body>
+</html>

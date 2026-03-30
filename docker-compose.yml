@@ -1,0 +1,32 @@
+services:
+  db_wordpress:
+    image: mariadb:10.11
+    container_name: wp_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: wordpress_db
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: indio2272
+      MYSQL_ROOT_PASSWORD: indio2272
+    volumes:
+      - wp_db_data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:latest
+    container_name: wp_app
+    restart: always
+    ports:
+      - "8002:80"
+    environment:
+      WORDPRESS_DB_HOST: db_wordpress
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: indio2272
+      WORDPRESS_DB_NAME: wordpress_db
+    volumes:
+      - wp_site_data:/var/www/html
+    depends_on:
+      - db_wordpress
+
+volumes:
+  wp_db_data:
+  wp_site_data:

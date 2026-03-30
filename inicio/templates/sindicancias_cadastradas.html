@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Sindicâncias Cadastradas{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Sindicâncias Cadastradas</h2>
+        <form method="post" action="{% url 'inicio:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition duration-200">
+                Logout
+            </button>
+        </form>
+    </div>
+
+    <!-- Tabela de Sindicâncias -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unidade</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delegante</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delegada</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Portaria</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Início</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for sind in object_list %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="{% url 'inicio:detalhes_sindicancia' sind.id %}" class="text-fb-blue hover:underline">{{ sind }}</a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ sind.unidade }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ sind.posto_delegante|add:" " }}{{ sind.delegante }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ sind.posto_delegada|add:" " }}{{ sind.delegada }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ sind.data_portaria }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ sind.data_inicio }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button onclick="location.href='{% url 'inicio:editar_sindicancia' sind.id %}'" 
+                                        class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">
+                                    Editar
+                                </button>
+                                <form method="post" action="{% url 'inicio:excluir_sindicancia' sind.id %}" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" 
+                                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
+                                            onclick="return confirm('Tem certeza que deseja excluir esta sindicância?');">
+                                        Excluir
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Botão de Cadastro -->
+    <div class="mt-6 text-right">
+        <button onclick="location.href='{% url 'inicio:criar_sindicancia' %}'" 
+                class="bg-fb-green hover:bg-fb-green-dark text-white px-4 py-2 rounded-md transition duration-200">
+            Cadastrar Sindicância
+        </button>
+    </div>
+</div>
+
+<style>
+    /* Estilo adicional para a tabela */
+    th {
+        background-color: #f7fafc;
+    }
+    
+    /* Efeito hover nas linhas da tabela */
+    tr:hover {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}

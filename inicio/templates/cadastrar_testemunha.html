@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Testemunha</title>
+    <style>
+        body {
+            background-color: #D8BFD8; /* Fundo roxo claro */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #4B0082; /* Cor do título */
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            color: #4B0082;
+        }
+        input, select, textarea {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            background-color: #4B0082; /* Cor do botão */
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 15px;
+        }
+        input[type="submit"]:hover {
+            background-color: #6A0DAD;
+        }
+        .hidden {
+            display: none;
+        }
+        .radio-group {
+            margin-bottom: 20px;
+            margin-top: 10px; /* Ajuste a margem superior aqui */
+        }
+        .radio-group label {
+            margin-right: 10px;
+            margin-bottom: 0;
+        }
+        .radio-group input {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Cadastrar Testemunha para Sindicância: {{ sindicancia.numero }}</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <!-- Renderize o formulário como parágrafos, exceto o campo graduação -->
+            {% for field in form %}
+                {% if field.name != 'graduacao' %}
+                    <p>{{ field.label_tag }}<br>{{ field }}</p>
+                {% endif %}
+            {% endfor %}
+
+            <!-- Campo Graduação -->
+            <div id="graduacao-field" class="hidden">
+                <label for="id_graduacao">Graduação:</label>
+                <select name="graduacao" id="id_graduacao">
+                    <option value="">---------</option>
+                    <option value="Sd PM">Sd PM</option>
+                    <option value="Cb PM">Cb PM</option>
+                    <option value="3º Sgt PM">3º Sgt PM</option>
+                    <option value="2º Sgt PM">2º Sgt PM</option>
+                    <option value="1º Sgt PM">1º Sgt PM</option>
+                    <option value="Sub Ten PM">Sub Ten PM</option>
+                    <option value="Asp Of PM">Asp Of PM</option>
+                    <option value="2º Ten PM">2º Ten PM</option>
+                    <option value="1º Ten PM">1º Ten PM</option>
+                    <option value="Cap PM">Cap PM</option>
+                    <option value="Maj PM">Maj PM</option>
+                    <option value="Ten Cel PM">Ten Cel PM</option>
+                    <option value="Cel PM">Cel PM</option>
+                </select>
+            </div>
+
+            <input type="submit" value="Cadastrar">
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var militarRadios = document.querySelectorAll('input[name="militar"]');
+            var graduacaoField = document.getElementById('graduacao-field');
+
+            function toggleGraduacaoField() {
+                var selectedValue = document.querySelector('input[name="militar"]:checked');
+                if (selectedValue && selectedValue.value === 'sim') {
+                    graduacaoField.classList.remove('hidden');
+                } else {
+                    graduacaoField.classList.add('hidden');
+                }
+            }
+
+            militarRadios.forEach(function(radio) {
+                radio.addEventListener('change', toggleGraduacaoField);
+            });
+
+            // Inicializa a visibilidade do campo com base na seleção atual
+            toggleGraduacaoField();
+        });
+    </script>
+</body>
+</html>
