@@ -3,16 +3,14 @@
 from django.urls import path
 
 import inicio.views
-from.views import Sind_Cadastradas,Cd,Inquerito,RIOG,Criar_conta
+from .views import Sind_Cadastradas,Criar_conta
 from django.contrib.auth import views as auth_view
 
 app_name='inicio'
 
 urlpatterns = [
-    path('cad_ipm', Inquerito.as_view(),name='inquerito'),
+    
     path('sind_cadastradas', Sind_Cadastradas.as_view(),name='sind_cadastradas'),
-    path('cad_cd', Cd.as_view(),name='cd'),
-    path('cad_riog', RIOG.as_view(),name='riog'),
     path('', auth_view.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_view.LogoutView.as_view(next_page='inicio:login'), name='logout'),
     path('criar_conta/', Criar_conta.as_view(), name='criar_conta'),

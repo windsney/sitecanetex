@@ -58,16 +58,7 @@ class Sind_Cadastradas(LoginRequiredMixin,ListView):
     template_name = "cad_investigado_sind.html"
     model = Sindicado
 '''
-class Cd(TemplateView):
 
-    template_name = "cad_cd.html"
-
-class Inquerito (TemplateView):
-    template_name = "cad_ipm.html"
-
-
-class RIOG(TemplateView):
-    template_name = "cad_riog.html"
 class Criar_conta(FormView):
     template_name = "criar_conta.html"
     form_class = UsuarioForm

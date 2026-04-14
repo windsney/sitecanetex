@@ -145,55 +145,6 @@ class Oficio (models.Model):
 
 
 
-
-
-
-
-
-
-
-class Ipm (models.Model):
-    numero=models.CharField(max_length=100)
-    unidade=models.CharField(max_length=100)
-    delegante=models.CharField(max_length=100)
-    posto_delegante=models.CharField(max_length=100)
-    delegada=models.CharField(max_length=100)
-    posto_delegada=models.CharField(max_length=50)
-    data_portaria=models.DateField(default=0)
-    data_inicio= models.DateField(default=0)
-    historico=models.TextField(max_length=2000)
-
-    def __str__(self):
-        return self.numero
-
-class Conselho (models.Model):
-    numero=models.CharField(max_length=100)
-    unidade=models.CharField(max_length=100)
-    delegante=models.CharField(max_length=100)
-    posto_delegante=models.CharField(max_length=100)
-    delegada=models.CharField(max_length=100)
-    posto_delegada=models.CharField(max_length=50)
-    data_portaria=models.DateField(default=0)
-    data_inicio= models.DateField(default=0)
-    historico=models.TextField(max_length=2000)
-
-    def __str__(self):
-        return self.numero
-
-class Riog (models.Model):
-    numero=models.CharField(max_length=100)
-    unidade=models.CharField(max_length=100)
-    delegante=models.CharField(max_length=100)
-    posto_delegante=models.CharField(max_length=100)
-    delegada=models.CharField(max_length=100)
-    posto_delegada=models.CharField(max_length=50)
-    data_portaria=models.DateField(default=0)
-    data_inicio= models.DateField(default=0)
-    historico=models.TextField(max_length=2000)
-
-    def __str__(self):
-        return self.numero
-
 class Usuario(AbstractUser):
     nome_completo=models.CharField(max_length=100)
     posto=models.CharField(max_length=100)
