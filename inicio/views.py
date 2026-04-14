@@ -98,7 +98,11 @@ def criar_sindicancia(request):
     return render(request, 'criar_sindicancia.html', {'form': form,'usuario':usuario})
 
 @login_required(login_url='/')
+
+
+
 def editar_sindicancia(request, id):
+    
     usuario = request.user.id
     sindicancia = get_object_or_404(Sindicancia, id=id)
 
