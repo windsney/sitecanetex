@@ -1,97 +1,76 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criar Ofício</title>
-    <style>
-        body {
-            background-color: #D8BFD8; /* Fundo roxo claro */
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Alinha os itens no início verticalmente */
-            height: 100vh;
-        }
-        .container {
-            width: 100%;
-            max-width: 600px; /* Aumenta a largura máxima */
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-top: 100px; /* Aumenta a distância do topo */
-        }
-        h2 {
-            text-align: center;
-            color: #4B0082; /* Cor do título */
-            margin-bottom: 20px;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-        label {
-            margin-bottom: 5px;
-            color: #4B0082;
-        }
-        select {
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            width: 100%; /* Garante que o campo ocupe toda a largura do contêiner */
-            height: auto;
-        }
-        .button-container {
-            text-align: center;
-        }
-        .button-container button {
-            padding: 10px 20px;
-            background-color: #4B0082; /* Cor do botão */
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 0 10px;
-        }
-        .button-container button:hover {
-            background-color: #6A0DAD;
-        }
-    </style>
-    <script>
-        function redirecionarParaNovaPagina() {
-            const tipoOficio = document.getElementById("tipo_oficio").value;
-            if (tipoOficio) {
-                window.location.href = "/prorrogacao/?tipo=" + tipoOficio;
-            }
-        }
-    </script>
-</head>
-<body>
-    <div class="container">
-        <h2>Criar Ofício</h2>
-        <form method="POST">
+{% extends 'base.html' %}
+
+{% block title %}Criar Ofício{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto mt-10">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+            Criar Novo Ofício
+        </h2>
+        
+        <form method="POST" class="space-y-4">
             {% csrf_token %}
-            <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Selecione o tipo de ofício</legend>
-                <label for="tipo_oficio">Tipo de Ofício:</label>
-                <select id="tipo_oficio" name="tipo_oficio" size="7" onchange="redirecionarParaNovaPagina()">
-                    <option value="" disabled selected>Selecione uma opção</option>
-                    <option value="solicitar_prorrogacao">Solicitar Prorrogação</option>
-                    <option value="solicitar_dilacao">Solicitar Dilação</option>
-                    <option value="solicitar_sobrestamento">Solicitar Sobrestamento</option>
-                    <option value="notificar_testemunha">Notificar Testemunha</option>
-                    <option value="notificar_ofendido">Notificar Ofendido</option>
-                    <option value="notificar_sindicado">Notificar Sindicado</option>
-                    <option value="oficio_diverso">Ofício Diverso</option>
+            
+            <div class="border-b border-gray-200 pb-4 mb-4">
+                <p class="text-sm text-gray-600 font-medium">
+                    Selecione abaixo o tipo de documento que deseja gerar:
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label for="tipo_oficio" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Tipo de Ofício:
+                </label>
+                <select id="tipo_oficio" 
+                        name="tipo_oficio" 
+                        size="8" 
+                        onchange="redirecionarParaNovaPagina()"
+                        class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700 bg-gray-50">
+                    <option value="" disabled selected class="py-2">-- Selecione uma opção para continuar --</option>
+                    <option value="solicitar_prorrogacao" class="p-2 border-b border-gray-100">Solicitar Prorrogação</option>
+                    <option value="solicitar_dilacao" class="p-2 border-b border-gray-100">Solicitar Dilação</option>
+                    <option value="solicitar_sobrestamento" class="p-2 border-b border-gray-100">Solicitar Sobrestamento</option>
+                    <option value="notificar_testemunha" class="p-2 border-b border-gray-100">Notificar Testemunha</option>
+                    <option value="notificar_ofendido" class="p-2 border-b border-gray-100">Notificar Ofendido</option>
+                    <option value="notificar_sindicado" class="p-2 border-b border-gray-100">Notificar Sindicado</option>
+                    <option value="oficio_diverso" class="p-2">Ofício Diverso</option>
                 </select>
-            </fieldset>
+            </div>
+
+            <div class="pt-6 flex justify-center space-x-4">
+                <button type="button" 
+                        onclick="window.history.back()" 
+                        class="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    Voltar
+                </button>
+                <button type="button" 
+                        onclick="redirecionarParaNovaPagina()"
+                        class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Prosseguir
+                </button>
+            </div>
         </form>
     </div>
-</body>
-</html>
+</div>
 
+<script>
+    function redirecionarParaNovaPagina() {
+        const tipoOficio = document.getElementById("tipo_oficio").value;
+        if (tipoOficio) {
+            window.location.href = "/prorrogacao/?tipo=" + tipoOficio;
+        }
+    }
+</script>
+
+<style>
+    /* Estilo para deixar as opções do select mais espaçosas em telas maiores */
+    select[size] option {
+        padding: 10px;
+        cursor: pointer;
+    }
+    select[size] option:hover {
+        background-color: #ebf5ff; /* Fundo azul claro ao passar o mouse */
+    }
+</style>
+{% endblock %}
