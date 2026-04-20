@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Criar Sindicância{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Criar Nova Sindicância</h2>
+        
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            
+            <!-- Seção de Informações Básicas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label for="id_numero" class="block text-sm font-medium text-gray-700 mb-1">Número</label>
+                    {{ form.numero }}
+                </div>
+                
+                
+            </div>
+            
+            <!-- Seção do Delegante -->
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <h3 class="text-lg font-medium text-gray-700 mb-3">Informações do Delegante</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="form-group">
+                        <label for="id_delegante" class="block text-sm font-medium text-gray-700 mb-1">Delegante</label>
+                        {{ form.delegante }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_posto_delegante" class="block text-sm font-medium text-gray-700 mb-1">Posto/Graduação</label>
+                        {{ form.posto_delegante }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_funcao_delegante" class="block text-sm font-medium text-gray-700 mb-1">Função</label>
+                        {{ form.funcao_delegante }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Seção de Datas Importantes -->
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <h3 class="text-lg font-medium text-gray-700 mb-3">Datas Relevantes</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="form-group">
+                        <label for="id_data_portaria" class="block text-sm font-medium text-gray-700 mb-1">Data Portaria</label>
+                        {{ form.data_portaria }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_dia_recebido" class="block text-sm font-medium text-gray-700 mb-1">Data Recebimento</label>
+                        {{ form.dia_recebido }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
+                        {{ form.data_inicio }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_data_fato" class="block text-sm font-medium text-gray-700 mb-1">Data do Fato</label>
+                        {{ form.data_fato }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Seção de Detalhes do Fato -->
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <h3 class="text-lg font-medium text-gray-700 mb-3">Local do Fato</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="id_hora_fato" class="block text-sm font-medium text-gray-700 mb-1">Horário</label>
+                        {{ form.hora_fato }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_em_servico" class="block text-sm font-medium text-gray-700 mb-1">Em Serviço</label>
+                        {{ form.em_servico }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_rua_fato" class="block text-sm font-medium text-gray-700 mb-1">Rua</label>
+                        {{ form.rua_fato }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_bairro_fato" class="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+                        {{ form.bairro_fato }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_cidade_fato" class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                        {{ form.cidade_fato }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Seção de Textos Longos -->
+            <div class="border-t border-gray-200 pt-4 mt-4">
+                <div class="form-group">
+                    <label for="id_historico" class="block text-sm font-medium text-gray-700 mb-1">Histórico</label>
+                    {{ form.historico }}
+                </div>
+                
+                <div class="form-group mt-4">
+                    <label for="id_padrao_oficio" class="block text-sm font-medium text-gray-700 mb-1">
+                        Padrão do Ofício 
+                        <span class="text-xs text-gray-500">(Ex: Ofício nº 001/SIND/XXXXXXXX/2024 - informe apenas XXXXXXXX)</span>
+                    </label>
+                    {{ form.padrao_oficio }}
+                </div>
+            </div>
+            
+            <!-- Botões de Ação -->
+            <div class="border-t border-gray-200 pt-6 mt-6 flex justify-end space-x-3">
+                <button type="button" onclick="window.history.back()" 
+                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fb-blue">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-fb-blue hover:bg-fb-blue-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fb-blue">
+                    Salvar Sindicância
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Estilos personalizados para os campos do formulário -->
+<style>
+    /* Estilização dos inputs */
+    input, select, textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #1877f2;
+        box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.1);
+    }
+    
+    /* Estilo para campos de data/hora */
+    input[type="date"], input[type="time"] {
+        appearance: none;
+    }
+    
+    /* Estilo para o campo de histórico (textarea) */
+    textarea {
+        min-height: 100px;
+    }
+    
+    /* Estilo para os selects */
+    select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+</style>
+{% endblock %}
