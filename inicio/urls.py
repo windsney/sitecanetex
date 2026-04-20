@@ -9,6 +9,8 @@ from django.contrib.auth import views as auth_view
 app_name='inicio'
 
 urlpatterns = [
+
+    path('selecionar-app/', inicio.views.selecao_app, name='selecao_app'),
     
     path('sind_cadastradas/', Sind_Cadastradas.as_view(),name='sind_cadastradas'),
     path('', auth_view.LoginView.as_view(template_name='login.html'), name='login'),

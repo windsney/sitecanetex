@@ -39,6 +39,10 @@ from django.db.models import Max
     template_name = "login.html"
 '''
 
+@login_required
+def selecao_app(request):
+    return render(request, 'selecao_app.html')
+
 class Sind_Cadastradas(LoginRequiredMixin,ListView):
 
     template_name = "sindicancias_cadastradas.html"
