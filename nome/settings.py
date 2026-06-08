@@ -25,15 +25,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-1pi2z^&y%qo-q9&z$znjxk98)5z2rvb)&z*jawt#21yv9q9&-1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['177.153.69.150', 'localhost', '127.0.0.1', '*']
-# ADICIONE ESTA LINHA:
-CSRF_TRUSTED_ORIGINS = [
-    'http://177.153.69.150:8001',
-    'http://177.153.69.150',
-    'https://177.153.69.150:8001', # Adicione tbm em https por precaução
-]
+ALLOWED_HOSTS = ['padraopm.com.br', 'www.padraopm.com.br', '177.153.69.150']
+
+# ADICIONE ESTA LINHA EXATAMENTE ASSIM:
+CSRF_TRUSTED_ORIGINS = ['https://padraopm.com.br', 'https://www.padraopm.com.br']
+
 
 # Adicione estas linhas para "relaxar" a segurança do cookie na VPS sem HTTPS
 CSRF_COOKIE_SECURE = False
@@ -89,7 +87,7 @@ WSGI_APPLICATION = 'nome.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -100,16 +98,16 @@ DATABASES = {
         'PORT': '3306',
     }
 }
+
+
 '''
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
+'''
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
