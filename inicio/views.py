@@ -29,6 +29,9 @@ from meu_modulo.data_escrita import *
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib.auth import update_session_auth_hash
+from django.urls import reverse_lazy
 
 
 
@@ -38,6 +41,17 @@ from django.db.models import Max
 '''class Home(TemplateView):
     template_name = "login.html"
 '''
+
+class AlterarSenhaCustomView(PasswordChangeView):
+    template_name = 'alterar_senha.html'
+    # Aponta para a rota de sucesso dentro do app inicio
+    success_url = reverse_lazy('inicio:password_change_done') 
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Força o Django a atualizar os dados de autenticação e manter o operador logado
+        update_session_auth_hash(self.request, form.user)
+        return response
 
 @login_required
 def selecao_app(request):

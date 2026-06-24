@@ -25,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-1pi2z^&y%qo-q9&z$znjxk98)5z2rvb)&z*jawt#21yv9q9&-1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['padraopm.com.br', 'www.padraopm.com.br', '177.153.69.150']
+ALLOWED_HOSTS = ['padraopm.com.br', 'www.padraopm.com.br', '177.153.69.150','*']
 
 # ADICIONE ESTA LINHA EXATAMENTE ASSIM:
 CSRF_TRUSTED_ORIGINS = ['https://padraopm.com.br', 'https://www.padraopm.com.br']
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'inicio',
     'cd',
+    'vtr',
     
 ]
 
@@ -87,7 +88,7 @@ WSGI_APPLICATION = 'nome.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -107,27 +108,14 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-'''
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
 AUTH_USER_MODEL="inicio.Usuario"
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+AUTH_PASSWORD_VALIDATORS = []
 
 
 # Internationalization

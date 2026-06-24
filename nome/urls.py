@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('inicio.urls',namespace='inicio')),
     path('', include('cd.urls',namespace='cd')),
+    path('', include('vtr.urls',namespace='vtr')),
 ]
 
 urlpatterns = urlpatterns +  static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

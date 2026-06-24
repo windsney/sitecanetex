@@ -1,10 +1,11 @@
 
 
-from django.urls import path
+from django.urls import path,reverse_lazy
 
 import inicio.views
-from .views import Sind_Cadastradas,Criar_conta
+from .views import Sind_Cadastradas,Criar_conta,AlterarSenhaCustomView
 from django.contrib.auth import views as auth_view
+
 
 app_name='inicio'
 
@@ -16,6 +17,15 @@ urlpatterns = [
     path('', auth_view.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_view.LogoutView.as_view(next_page='inicio:login'), name='logout'),
     path('criar_conta/', Criar_conta.as_view(), name='criar_conta'),
+    
+    path('alterar-senha/', AlterarSenhaCustomView.as_view(), name='password_change'),
+    
+    # Tela que mostra a confirmação de sucesso
+    path(
+        'alterar-senha/sucesso/', 
+        auth_view.PasswordChangeDoneView.as_view(template_name='alterar_senha_sucesso.html'), 
+        name='password_change_done'
+    ),
 
     #path('cad_sind/<int:pk>',Detalhe_sind.as_view(), name='detalhe'),
     #path('cad_investigado_sind/<int:pk>',Cadastro_investigado_sind.as_view(), name='cadastro_investigado_sind'),

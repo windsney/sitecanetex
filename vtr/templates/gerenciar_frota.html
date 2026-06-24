@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento da Frota</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 p-6 md:p-8">
+    <div class="container mx-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+            <div>
+                <a href="{% url 'vtr:home' %}" class="text-blue-600 hover:text-blue-800 font-semibold text-sm">&larr; Voltar para o Painel</a>
+                <h1 class="text-2xl font-bold text-gray-800 mt-2">Controle Geral de Viaturas</h1>
+            </div>
+            <a href="{% url 'vtr:viatura_add' %}" class="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-all shadow">+ Cadastrar Nova Viatura</a>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-900 text-white text-xs font-bold uppercase tracking-wider">
+                            <th class="p-4">Viatura</th>
+                            <th class="p-4">Vínculo OPM</th>
+                            <th class="p-4">Situação</th>
+                            <th class="p-4 text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 text-sm">
+                        {% for viatura in viaturas %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-4">
+                                <span class="font-mono font-bold block text-gray-900 text-base">{{ viatura.placa }}</span>
+                                <span class="text-xs text-gray-500">{{ viatura.modelo }}</span>
+                            </td>
+                            <td class="p-4">
+                                <span class="font-bold text-gray-700 block">{{ viatura.unidade.sigla }}</span>
+                                <span class="text-xs text-gray-400">{{ viatura.subunidade|default:"Sede" }}</span>
+                            </td>
+                            <td class="p-4">
+                                {% if viatura.situacao == 'OPERACIONAL' %}
+                                <span class="text-green-700 bg-green-100 px-2.5 py-1 rounded-full text-xs font-bold uppercase">Operacional</span>
+                                {% else %}
+                                <span class="text-red-700 bg-red-100 px-2.5 py-1 rounded-full text-xs font-bold uppercase">Baixada</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-4 text-center space-x-2">
+                                <a href="{% url 'vtr:viatura_edit' viatura.pk %}" class="text-yellow-600 hover:text-yellow-800 font-semibold text-xs border border-yellow-300 rounded px-2.5 py-1 bg-yellow-50">Editar</a>
+                                <a href="{% url 'vtr:viatura_delete' viatura.pk %}" class="text-red-600 hover:text-red-800 font-semibold text-xs border border-red-300 rounded px-2.5 py-1 bg-red-50">Excluir</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="p-8 text-center text-gray-400">Nenhuma viatura inserida na frota regional ainda.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

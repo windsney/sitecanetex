@@ -14,18 +14,19 @@
                 Informações da Conta
             </legend>
             
-            <!-- Renderiza os campos do formulário individualmente para melhor estilização -->
             {% for field in form %}
             <div>
                 <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
                     {{ field.label }}
                 </label>
                 {{ field }}
-                {% if field.help_text %}
+                
+                {% if field.help_text and field.name != 'username' and 'password' not in field.name %}
                 <p class="mt-1 text-sm text-gray-500">{{ field.help_text }}</p>
                 {% endif %}
+                
                 {% for error in field.errors %}
-                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                <p class="mt-1 text-sm text-red-600">⚠️ {{ error }}</p>
                 {% endfor %}
             </div>
             {% endfor %}
@@ -45,7 +46,6 @@
     </div>
 </div>
 
-<!-- Adicionando estilos específicos para os campos do formulário -->
 <style>
     /* Estilização dos inputs para combinar com o tema */
     input, select {

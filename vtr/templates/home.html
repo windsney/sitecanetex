@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Logística - 4º Comando Regional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Configuração de Impressão (Esconde o que não é relatório) */
+        @media print {
+            .noprint, nav, button, .filter-bar, .ver-viaturas { 
+                display: none !important; 
+            }
+            body { 
+                background: white; 
+                padding: 0; 
+                color: black; 
+            }
+            .container { 
+                max-width: 100% !important; 
+                padding: 1rem !important; 
+            }
+            .shadow-lg, .shadow-md, .shadow, .shadow-sm { 
+                box-shadow: none !important; 
+                border: 1px solid #ddd; 
+            }
+            .unit-card { 
+                break-inside: avoid; 
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+    <header class="bg-gray-900 text-white p-4 shadow-md noprint">
+        <div class="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+            <div class="flex items-center space-x-3">
+                <div class="bg-green-700 p-2 rounded-lg font-bold text-lg tracking-wider">4ºCR</div>
+                <h1 class="text-xl font-bold uppercase tracking-wide hidden md:block">
+                    Sistema de Gestão de Viaturas - 4º Comando Regional
+                </h1>
+                <h1 class="text-base font-bold uppercase tracking-wide md:hidden">
+                    Gestão de Viaturas - 4º CR
+                </h1>
+            </div>
+            <div class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end">
+                <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold text-sm flex items-center space-x-2 transition-colors">
+                    <span>🖨️ Imprimir</span>
+                </button>
+                
+                <div class="flex items-center space-x-3 border-l border-gray-700 pl-4">
+                    
+
+                    <div class="text-right hidden sm:block">
+                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Operador</span>
+                        <span class="text-xs font-semibold text-blue-400 block">
+                            👤 {{ user.get_full_name|default:user.username }}
+                        </span>
+                        <a href="{% url 'inicio:password_change' %}" class="text-[10px] text-gray-400 hover:text-white underline transition-colors block mt-0.5">
+                            Alterar minha senha
+                        </a>
+                    </div>
+                    
+                    <form method="POST" action="{% url 'inicio:logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="text-xs font-bold bg-red-600/20 hover:bg-red-600 hover:text-white text-red-400 px-2.5 py-1.5 rounded-lg transition-all flex items-center space-x-1 cursor-pointer">
+                            <span class="sm:hidden text-[11px] mr-1">{{ user.username }}</span>
+                            <span>Sair</span>
+                            <span>🚪</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-6 md:p-8">
+
+        <div class="bg-white p-4 rounded-xl shadow-sm mb-8 flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0 filter-bar noprint border border-gray-200">
+            <div class="text-sm">
+                <h2 class="text-lg font-bold text-gray-800 tracking-tight">Resumo da Frota Regional</h2>
+                <p class="text-xs text-gray-500">Dados consolidados em tempo real de todas as unidades</p>
+            </div>
+            {% if perms.vtr.view_viatura %}
+            <div class="flex items-center space-x-3">
+                <a href="{% url 'vtr:gerenciar_frota' %}" class="bg-gray-800 hover:bg-gray-700 text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-sm transition-all flex items-center space-x-1">
+                    <span>🛠️ Alimentar & Gerenciar Dados</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div class="bg-white border-2 border-green-500 p-6 rounded-2xl shadow-md flex items-center space-x-6 relative overflow-hidden">
+                <div class="absolute inset-0 bg-green-50 opacity-30"></div>
+                <div class="relative z-10 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center border-4 border-green-200">
+                    <span class="text-green-600 text-3xl font-bold">✓</span>
+                </div>
+                <div class="relative z-10">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Geral Operacional</p>
+                    <p class="text-5xl font-black text-green-700 leading-none mt-1">{{ total_geral_operacional }}</p>
+                </div>
+            </div>
+
+            <div class="bg-white border-2 border-red-500 p-6 rounded-2xl shadow-md flex items-center space-x-6 relative overflow-hidden">
+                <div class="absolute inset-0 bg-red-50 opacity-30"></div>
+                <div class="relative z-10 w-16 h-16 bg-red-100 rounded-full flex items-center justify-center border-4 border-red-200">
+                    <span class="text-red-600 text-3xl font-black">!</span>
+                </div>
+                <div class="relative z-10">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Geral Baixadas</p>
+                    <p class="text-5xl font-black text-red-700 leading-none mt-1">{{ total_geral_baixada }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {% for unidade in unidades %}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200 unit-card flex flex-col justify-between">
+                <div>
+                    <div class="bg-gray-800 text-white px-5 py-3.5 flex items-center justify-between">
+                        <h3 class="text-base font-bold tracking-wide uppercase">{{ unidade.sigla }}</h3>
+                        <span class="text-gray-400 text-xs">🏢</span>
+                    </div>
+                    
+                    <div class="p-5 space-y-4">
+                        <div class="text-xs text-gray-400 font-bold uppercase tracking-wider h-4 overflow-hidden truncate">
+                            {{ unidade.nome }}
+                        </div>
+                        
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-green-700 font-bold">✓ Operacionais</span>
+                                <span class="font-mono text-gray-900 font-bold bg-green-50 px-2 py-0.5 rounded border border-green-200">
+                                    {{ unidade.operacionais }} / {{ unidade.total_vtrs }} <span class="text-gray-400 font-normal">({{ unidade.pct_operacional }}%)</span>
+                                </span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-green-500 h-2.5 rounded-full transition-all duration-500" style="width: {{ unidade.pct_operacional }}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-red-700 font-bold">✗ Baixadas</span>
+                                <span class="font-mono text-gray-900 font-bold bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                                    {{ unidade.baixadas }} / {{ unidade.total_vtrs }} <span class="text-gray-400 font-normal">({{ unidade.pct_baixada }}%)</span>
+                                </span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-red-500 h-2.5 rounded-full transition-all duration-500" style="width: {{ unidade.pct_baixada }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-end ver-viaturas noprint">
+                    <a href="{% url 'vtr:unidade_detail' unidade.pk %}" class="text-blue-600 hover:text-blue-800 font-bold text-xs uppercase tracking-wider flex items-center space-x-1 group">
+                        <span>Ver Viaturas</span>
+                        <span class="transform group-hover:translate-x-1 transition-transform">&rarr;</span>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-1 sm:col-span-2 lg:col-span-4 text-center py-16 text-gray-500 bg-white rounded-2xl shadow-sm border border-gray-200">
+                <p class="text-base font-semibold">Nenhuma unidade cadastrada no sistema.</p>
+                <p class="text-xs text-gray-400 mt-1">Insira as unidades no painel administrative para iniciar o monitoramento.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer class="mt-12 pb-6 text-center noprint">
+        <div class="inline-flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs text-gray-500 bg-white px-6 py-3 rounded-xl shadow-sm border border-gray-200">
+            <span class="font-semibold text-gray-700">
+                 Desenvolvido por Maj PM Windsney
+            </span>
+            <div class="hidden sm:block h-3 w-px bg-gray-300"></div>
+            <div class="flex items-center space-x-2 text-gray-600 font-medium">
+                <span>💬 Dúvidas & Sugestões:</span>
+                <a href="https://wa.me/5565996912053" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold underline transition-all">
+                    (65) 99691-2053
+                </a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
