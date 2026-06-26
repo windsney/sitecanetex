@@ -1,75 +1,69 @@
-from .models import RegistroDiario, MaterialApreendido # Importe do models aqui
+from django.shortcuts import render, redirect
+from django.db.models import Sum
+from django.http import JsonResponse
+from datetime import date, timedelta
+from .models import RegistroDiario, MaterialApreendido
 from .forms import RegistroDiarioForm, MaterialFormSet
-from django.shortcuts import render
-from django.views.generic import CreateView, TemplateView
-from django.urls import reverse_lazy
-from django.db.models import Sum, Count
-from .models import RegistroDiario
-from .forms import RegistroDiarioForm, MaterialFormSet,MaterialApreendido
-import json
 
-# --- LANÇAMENTO (Operador) ---
-class RegistrarOcorrenciaView(CreateView):
-    model = RegistroDiario
-    form_class = RegistroDiarioForm
-    template_name = 'registrar.html'
-    success_url = reverse_lazy('produtividade:dashboard')
+# --- VIEWS DO DASHBOARD ---
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['formset'] = MaterialFormSet(self.request.POST)
-        else:
-            context['formset'] = MaterialFormSet()
-        return context
+def dashboard_view(request):
+    """Renderiza a página principal do Dashboard."""
+    return render(request, 'dashboard.html')
 
-    def form_valid(self, form):
-        context = self.get_context_data()
-        formset = context['formset']
-        if formset.is_valid():
-            self.object = form.save()
-            formset.instance = self.object
+def api_dados_materiais(request):
+    """Retorna a soma de materiais agrupados por TipoMaterial."""
+    inicio = request.GET.get('inicio')
+    fim = request.GET.get('fim')
+    
+    queryset = MaterialApreendido.objects.all()
+    if inicio and fim:
+        queryset = queryset.filter(ocorrencia__data_servico__range=[inicio, fim])
+        
+    # Agrupa pelo nome do tipo de material e da unidade
+    dados = queryset.values('tipo_material__nome', 'unidade__nome') \
+        .annotate(total=Sum('quantidade')) \
+        .order_by('-total')
+    
+    return JsonResponse(list(dados), safe=False)
+
+def api_dados_produtividade(request):
+    """Retorna os dados de produtividade diária."""
+    inicio = request.GET.get('inicio')
+    fim = request.GET.get('fim')
+    
+    # Se não houver filtro, limita aos últimos 30 dias para evitar sobrecarga
+    if not inicio or not fim:
+        fim = date.today()
+        inicio = fim - timedelta(days=30)
+        
+    queryset = RegistroDiario.objects.filter(data_servico__range=[inicio, fim])
+        
+    dados = queryset.values('data_servico').annotate(
+        total_pessoas=Sum('pessoas_conduzidas'),
+        total_veiculos=Sum('veiculos_apreendidos'),
+        total_notificacoes=Sum('notificacoes'),
+        total_tco=Sum('tco'),
+        total_starts=Sum('starts'),
+        total_barreiras=Sum('barreiras')
+    ).order_by('data_servico')
+    
+    return JsonResponse(list(dados), safe=False)
+
+# --- VIEWS DE LANÇAMENTO (P3) ---
+
+def registrar_ocorrencia(request):
+    """View para o operador P3 lançar registros."""
+    if request.method == "POST":
+        form = RegistroDiarioForm(request.POST)
+        formset = MaterialFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            registro = form.save()
+            formset.instance = registro
             formset.save()
-            return super().form_valid(form)
-        return self.form_invalid(form)
-
-# --- DASHBOARD (Visualizador/Gestor) ---
-class DashboardView(TemplateView):
-    template_name = 'dashboard.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        data_inicio = self.request.GET.get('data_inicio')
-        data_fim = self.request.GET.get('data_fim')
-        
-        registros = RegistroDiario.objects.all()
-        materiais = MaterialApreendido.objects.all()
-        
-        if data_inicio and data_fim:
-            registros = registros.filter(data_servico__range=[data_inicio, data_fim])
-            materiais = materiais.filter(ocorrencia__data_servico__range=[data_inicio, data_fim])
-            
-        # Produtividade
-        context['totais'] = registros.aggregate(
-            abordados=Sum('pessoas_abordadas'),
-            notificacoes=Sum('notificacoes'),
-            apreensoes=Sum('veiculos_apreendidos'),
-            pessoas_conduzidas=Sum('pessoas_conduzidas')
-        )
-        
-        # Materiais - Usando json.dumps para enviar dados perfeitos ao JS
-        dados = materiais.values('tipo_material__nome', 'natureza_especifica', 'unidade__nome') \
-                         .annotate(total=Sum('quantidade')) \
-                         .order_by('-total')
-
-        # Criamos duas listas separadas, mas garantimos que o índice 0 de labels
-        # seja o índice 0 de totais
-        labels = []
-        totais = []
-        
-        for d in dados:
-            labels.append(f"{d['unidade__nome']} de {d['natureza_especifica']} ({d['tipo_material__nome']})")
-            totais.append(d['total'])
-            
-        context['mat_labels'] = json.dumps(labels)
-        context['mat_totais'] = json.dumps(totais)
+            return redirect('produtividade:dashboard')
+    else:
+        form = RegistroDiarioForm()
+        formset = MaterialFormSet()
+    
+    return render(request, 'registrar.html', {'form': form, 'formset': formset})

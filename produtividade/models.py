@@ -1,8 +1,6 @@
 from django.db import models
 
-from django.db import models
-
-# --- MODELOS DE APOIO (O seu "Catálogo" no Admin) ---
+# --- MODELOS DE APOIO (Catálogos) ---
 
 class NaturezaOcorrencia(models.Model):
     nome = models.CharField(max_length=100, verbose_name="Natureza da Ocorrência")
@@ -16,7 +14,7 @@ class UnidadeMedida(models.Model):
     nome = models.CharField(max_length=50, verbose_name="Unidade (ex: petecas, gramas)")
     def __str__(self): return self.nome
 
-# --- MODELOS PRINCIPAIS ---
+# --- MODELO PRINCIPAL ---
 
 class RegistroDiario(models.Model):
     # Identificação
@@ -24,14 +22,14 @@ class RegistroDiario(models.Model):
     comandante = models.CharField(max_length=150, blank=True, null=True, verbose_name="Comandante da GUPM")
     componente = models.CharField(max_length=150, blank=True, null=True, verbose_name="Componente da GUPM")
     
-    # Ocorrência: agora usa ForeignKey para buscar o catálogo
+    # Ocorrência
     natureza_ocorrencia = models.ForeignKey(
         NaturezaOcorrencia, on_delete=models.SET_NULL, null=True, blank=True, 
         verbose_name="Natureza da Ocorrência"
     )
     detalhes_ocorrencia = models.TextField(blank=True, null=True, verbose_name="Detalhes da Ocorrência")
     
-    # Produtividade (Mantemos como Inteiros para facilitar os gráficos)
+    # Produtividade (Contadores Diários)
     pessoas_abordadas = models.IntegerField(default=0, verbose_name="Pessoas Abordadas")
     veiculos_abordados = models.IntegerField(default=0, verbose_name="Veículos Abordados")
     notificacoes = models.IntegerField(default=0, verbose_name="Notificações Aplicadas")
@@ -48,18 +46,21 @@ class RegistroDiario(models.Model):
     def __str__(self):
         return f"{self.data_servico} - {self.natureza_ocorrencia or 'Produtividade'}"
 
+# --- MODELO DE MATERIAIS (Vinculado ao Registro) ---
+
 class MaterialApreendido(models.Model):
+    # O related_name='materiais' é crucial para buscar os itens de um RegistroDiario
     ocorrencia = models.ForeignKey(
         RegistroDiario, 
         on_delete=models.CASCADE, 
-        related_name='materiais'
+        related_name='materiais',
+        verbose_name="Registro de Origem"
     )
     
-    # Agora usa ForeignKey para buscar o catálogo de tipos e unidades
     tipo_material = models.ForeignKey(TipoMaterial, on_delete=models.PROTECT, verbose_name="Tipo")
     unidade = models.ForeignKey(UnidadeMedida, on_delete=models.PROTECT, verbose_name="Unidade")
     
-    natureza_especifica = models.CharField(max_length=100, verbose_name="Ex: Cocaína, Maconha")
+    
     quantidade = models.IntegerField(default=0, verbose_name="Quantidade")
 
     class Meta:
@@ -67,4 +68,4 @@ class MaterialApreendido(models.Model):
         verbose_name_plural = "Materiais Apreendidos"
 
     def __str__(self):
-        return f"{self.natureza_especifica} ({self.quantidade} {self.unidade})"
+        return f"{self.tipo_material} ({self.quantidade} {self.unidade})"
