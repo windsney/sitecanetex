@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">Registrar Ocorrência e Produtividade</h2>
+    
+    <form method="POST" class="space-y-6">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{ form.as_div }}
+        </div>
+
+        <hr class="my-6">
+
+        <h3 class="text-lg font-semibold text-gray-700">Materiais Apreendidos</h3>
+        <div id="material-forms" class="space-y-4">
+            {{ formset.management_form }}
+            {% for mform in formset %}
+                <div class="flex gap-4 p-4 border rounded bg-gray-50">
+                    {{ mform.as_div }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700 transition">
+            Salvar Registro
+        </button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base1.html' %}
+{% block content %}
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded shadow" style="min-height: 400px;">
+        <h3 class="text-xl font-bold mb-4">Produtividade Operacional</h3>
+        <canvas id="prodChart"></canvas>
+    </div>
+
+    <div class="bg-white p-6 rounded shadow" style="height: 500px;">
+    <h3 class="text-xl font-bold mb-4">Materiais Apreendidos</h3>
+    <div style="position: relative; height: 90%; width: 100%;">
+        <canvas id="naturezaChart"></canvas>
+    </div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Dados injetados pelo Django
+    const labelsMateriais = {{ mat_labels|safe }};
+    const dadosMateriais = {{ mat_totais|safe }};
+
+    // Gráfico 1
+    new Chart(document.getElementById('prodChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Abordados', 'Notificações', 'Apreensões', 'Conduzidos'],
+            datasets: [{
+                label: 'Volume',
+                data: [
+                    {{ totais.abordados|default:0 }}, 
+                    {{ totais.notificacoes|default:0 }}, 
+                    {{ totais.apreensoes|default:0 }}, 
+                    {{ totais.pessoas_conduzidas|default:0 }}
+                ],
+                backgroundColor: ['#2563eb', '#16a34a', '#dc2626', '#f59e0b']
+            }]
+        }
+    });
+
+    // Gráfico 2
+    new Chart(document.getElementById('naturezaChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: labelsMateriais,
+            datasets: [{
+                label: 'Qtd Apreendida',
+                data: dadosMateriais,
+                backgroundColor: '#f59e0b'
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false, // Permite que ele preencha a div acima
+            scales: {
+                x: { 
+                    beginAtZero: true,
+                    ticks: { precision: 0 } // Garante que não apareçam números decimais
+                },
+                y: {
+                    ticks: {
+                        autoSkip: false // Impede que ele pule nomes para economizar espaço
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
