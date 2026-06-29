@@ -21,8 +21,9 @@ def api_dados_materiais(request):
         queryset = queryset.filter(ocorrencia__data_servico__range=[inicio, fim])
         
     # Agrupa pelo nome do tipo de material e da unidade
-    dados = queryset.values('tipo_material__nome', 'unidade__nome') \
+    dados = queryset.values('tipo_material__nome', 'tipo_material__cor', 'unidade__nome') \
         .annotate(total=Sum('quantidade')) \
+        .filter(quantidade__gt=0) \
         .order_by('-total')
     
     return JsonResponse(list(dados), safe=False)
@@ -39,16 +40,16 @@ def api_dados_produtividade(request):
         
     queryset = RegistroDiario.objects.filter(data_servico__range=[inicio, fim])
         
-    dados = queryset.values('data_servico').annotate(
+    dados = queryset.aggregate(
         total_pessoas=Sum('pessoas_conduzidas'),
         total_veiculos=Sum('veiculos_apreendidos'),
         total_notificacoes=Sum('notificacoes'),
         total_tco=Sum('tco'),
         total_starts=Sum('starts'),
         total_barreiras=Sum('barreiras')
-    ).order_by('data_servico')
+    )
     
-    return JsonResponse(list(dados), safe=False)
+    return JsonResponse([dados], safe=False)
 
 # --- VIEWS DE LANÇAMENTO (P3) ---
 

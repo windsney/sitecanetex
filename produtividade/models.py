@@ -8,6 +8,7 @@ class NaturezaOcorrencia(models.Model):
 
 class TipoMaterial(models.Model):
     nome = models.CharField(max_length=100, verbose_name="Tipo (ex: Droga, Arma)")
+    cor = models.CharField(max_length=7, default="#36a2eb", verbose_name="Cor (Hexadecimal)") # Adicione este campo
     def __str__(self): return self.nome
 
 class UnidadeMedida(models.Model):
