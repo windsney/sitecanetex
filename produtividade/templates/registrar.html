@@ -4,17 +4,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Lançamento P3</title>
     <style>
-    .form-control {
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        padding: 10px;
-    }
-    .form-control:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-    }
-    .card { border-radius: 15px; }
-</style>
+        .form-control { border: 2px solid #e9ecef; border-radius: 8px; padding: 10px; }
+        .card { border-radius: 15px; }
+    </style>
 </head>
 <body class="bg-light">
 
@@ -24,19 +16,89 @@
         
         <form method="post">
             {% csrf_token %}
-            <input type="date" name="data_servico" class="form-control" required>
             
-            {% for cat in categorias %}
-            <div class="mt-2">
-                <label>{{ cat.nome }}</label>
-                <input type="number" name="cat_{{ cat.id }}" value="0" class="form-control">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Data do Serviço</label>
+                    <input type="date" name="data_servico" class="form-control" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Natureza da Ocorrência</label>
+                    <select name="natureza_ocorrencia" class="form-control">
+                        <option value="">Selecione...</option>
+                        {% for nat in naturezas %}
+                            <option value="{{ nat.id }}">{{ nat.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-            {% endfor %}
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Comandante</label>
+                    <input type="text" name="comandante" class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Componente</label>
+                    <input type="text" name="componente" class="form-control">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>Detalhes</label>
+                <textarea name="detalhes_ocorrencia" class="form-control" rows="2"></textarea>
+            </div>
+
+            <hr>
+            <h5 class="text-secondary">Produtividade</h5>
+            <div class="row">
+                {% for cat in categorias %}
+                <div class="col-md-4 mt-2">
+                    <label>{{ cat.nome }}</label>
+                    <input type="number" name="cat_{{ cat.id }}" value="0" class="form-control">
+                </div>
+                {% endfor %}
+            </div>
+
+            <hr>
+            <h5 class="text-secondary">Materiais Apreendidos</h5>
+            <div id="materiais-container"></div>
+            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="adicionarMaterial()">+ Adicionar Material</button>
             
-            <button type="submit" class="btn btn-primary mt-3">Salvar Registro</button>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary w-100">Salvar Registro</button>
+            </div>
         </form>
-    </div>
+        </div>
 </div>
+
+<script>
+    function adicionarMaterial() {
+        const container = document.getElementById('materiais-container');
+        const div = document.createElement('div');
+        div.className = 'row mt-2';
+        div.innerHTML = `
+            <div class="col-md-5">
+                <select name="material_tipo[]" class="form-control">
+                    {% for mat in tipos_material %}
+                        <option value="{{ mat.id }}">{{ mat.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="material_qtd[]" placeholder="Qtd" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <select name="material_unidade[]" class="form-control">
+                    {% for un in unidades %}
+                        <option value="{{ un.id }}">{{ un.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+</script>
 
 </body>
 </html>

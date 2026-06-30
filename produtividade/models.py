@@ -4,6 +4,7 @@ from django.db import models
 
 class NaturezaOcorrencia(models.Model):
     nome = models.CharField(max_length=100, verbose_name="Natureza da Ocorrência")
+    cor = models.CharField(max_length=7, default="#36a2eb", verbose_name="Cor (Hex)")
     def __str__(self): return self.nome
 
 class TipoMaterial(models.Model):

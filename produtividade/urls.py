@@ -6,6 +6,7 @@ from django.urls import path
 from .views import dashboard_view,api_dados_materiais,api_dados_produtividade,registrar_ocorrencia
 
 
+
 app_name='produtividade'
 
 
@@ -19,3 +20,8 @@ urlpatterns = [
     path('api/produtividade/', api_dados_produtividade, name='api_produtividade'),
     path('registrar/', registrar_ocorrencia, name='registrar_ocorrencia'),
 ]
+
+
+
+
+

@@ -35,6 +35,11 @@ class RegistroDiarioAdmin(admin.ModelAdmin):
 @admin.register(TipoMaterial)
 class TipoMaterialAdmin(admin.ModelAdmin):
     form = CategoriaProdutividadeForm # Reutilizando o widget de cor
+    list_display = ('nome', 'cor')
 
 admin.site.register(NaturezaOcorrencia)
+class NaturezaOcorrenciaAdmin(admin.ModelAdmin):
+    # Reutilizando o widget de cor que criamos antes
+    form = CategoriaProdutividadeForm 
+    list_display = ('nome', 'cor')
 admin.site.register(UnidadeMedida)
