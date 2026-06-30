@@ -1,39 +1,40 @@
 from django.contrib import admin
+from django import forms
 from .models import (
     NaturezaOcorrencia, TipoMaterial, UnidadeMedida, 
-    RegistroDiario, MaterialApreendido
+    CategoriaProdutividade, RegistroDiario, ValorProdutividade, MaterialApreendido
 )
 
-# 1. Registro dos modelos de apoio para aparecerem no menu do Admin
-@admin.register(NaturezaOcorrencia, TipoMaterial, UnidadeMedida)
-class CatalogoAdmin(admin.ModelAdmin):
-    list_display = ('nome',)
+# Formulário para o seletor de cores
+class CategoriaProdutividadeForm(forms.ModelForm):
+    class Meta:
+        model = CategoriaProdutividade
+        fields = '__all__'
+        widgets = {'cor': forms.TextInput(attrs={'type': 'color'})}
 
-# 2. Configuração do formulário de materiais dentro do registro principal
+@admin.register(CategoriaProdutividade)
+class CategoriaProdutividadeAdmin(admin.ModelAdmin):
+    form = CategoriaProdutividadeForm
+    list_display = ('nome', 'cor')
+
+# Inlines para edição dentro do RegistroDiario
+class ValorProdutividadeInline(admin.TabularInline):
+    model = ValorProdutividade
+    extra = 1 # Quantidade de linhas vazias para preencher
+
 class MaterialApreendidoInline(admin.TabularInline):
     model = MaterialApreendido
-    extra = 1  # Quantidade de linhas em branco extras para facilitar o cadastro
-    fields = ('tipo_material', 'quantidade', 'unidade')
+    extra = 1
 
-# 3. Configuração do Registro Diário com os materiais inclusos
 @admin.register(RegistroDiario)
 class RegistroDiarioAdmin(admin.ModelAdmin):
-    list_display = ('data_servico', 'natureza_ocorrencia', 'comandante', 'pessoas_conduzidas')
-    list_filter = ('data_servico', 'natureza_ocorrencia')
-    search_fields = ('comandante', 'componente')
-    
-    # Isso conecta os materiais ao formulário do RegistroDiario
-    inlines = [MaterialApreendidoInline]
-    
-    # Campo para organizar a visualização no formulário
-    fieldsets = (
-        ('Informações Básicas', {
-            'fields': ('data_servico', 'comandante', 'componente', 'natureza_ocorrencia', 'detalhes_ocorrencia')
-        }),
-        ('Produtividade', {
-            'fields': (
-                'pessoas_abordadas', 'veiculos_abordados', 'notificacoes', 
-                'veiculos_apreendidos', 'tco', 'pessoas_conduzidas', 'starts', 'barreiras'
-            )
-        }),
-    )
+    list_display = ('data_servico', 'natureza_ocorrencia', 'comandante')
+    inlines = [ValorProdutividadeInline, MaterialApreendidoInline]
+
+# Registro dos outros modelos
+@admin.register(TipoMaterial)
+class TipoMaterialAdmin(admin.ModelAdmin):
+    form = CategoriaProdutividadeForm # Reutilizando o widget de cor
+
+admin.site.register(NaturezaOcorrencia)
+admin.site.register(UnidadeMedida)

@@ -60,25 +60,30 @@
             fetch("{% url 'produtividade:api_materiais' %}" + query)
                 .then(res => res.json())
                 .then(data => {
-                    // Filtra apenas se o total for maior que 0 (segurança extra)
                     const dadosFiltrados = data.filter(i => i.total > 0);
                     if (window.chartMat) window.chartMat.destroy();
-        
+
+                    // Criamos um array de datasets onde cada material é uma barra com sua cor
+                    const datasets = dadosFiltrados.map(i => ({
+                        label: `${i.tipo_material__nome} (${i.unidade__nome})`,
+                        data: [i.total], // O valor vai em um array pois só temos uma categoria "Total"
+                        backgroundColor: i.tipo_material__cor || '#36a2eb'
+                    }));
+
                     window.chartMat = new Chart(document.getElementById('graficoMateriais'), {
                         type: 'bar',
                         data: {
-                            labels: dadosFiltrados.map(i => `${i.tipo_material__nome} (${i.unidade__nome})`),
-                datasets: [{
-                    label: 'Qtd Apreendida',
-                    data: dadosFiltrados.map(i => i.total),
-                    // Mapeia a cor vinda do banco ou usa uma padrão
-                    backgroundColor: dadosFiltrados.map(i => i.tipo_material__cor || '#36a2eb')
-                }]
+                            labels: ['Qtd Apreendida'], // Label única no eixo X
+                            datasets: datasets
                         },
-                        options: { 
-                            plugins: { 
-                                datalabels: { anchor: 'center', color: '#fff', align: 'top' } 
-                            } 
+                        options: {
+                            plugins: {
+                                title: { display: true, text: 'Apreensões por Tipo' },
+                                datalabels: { anchor: 'center', color: '#000' }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
                         }
                     });
                 });
@@ -87,37 +92,19 @@
             fetch("{% url 'produtividade:api_produtividade' %}" + query)
                 .then(res => res.json())
                 .then(data => {
-                    const d = data[0]; 
-        
-                    // Garante que se vier 'null', vira 0
-                    const totalPessoas = d.total_pessoas || 0;
-                    const totalVeiculos = d.total_veiculos || 0;
-                    const totalNotificacoes = d.total_notificacoes || 0;
-                    const totalTco = d.total_tco || 0;
-                    const totalStarts = d.total_starts || 0;
-                    const totalBarreiras = d.total_barreiras || 0;
-
                     if (window.chartProd) window.chartProd.destroy();
-        
+                    
                     window.chartProd = new Chart(document.getElementById('graficoProdutividade'), {
                         type: 'bar',
                         data: {
-                            labels: ['Total'], 
-                            datasets: [
-                                { label: 'Pessoas Conduzidas', data: [totalPessoas], backgroundColor: '#ff6384' },
-                                { label: 'Veículos Apreendidos', data: [totalVeiculos], backgroundColor: '#4bc0c0' },
-                                { label: 'Notificações', data: [totalNotificacoes], backgroundColor: '#ffce56' },
-                                { label: 'TCO', data: [totalTco], backgroundColor: '#9966ff' },
-                                { label: 'Starts', data: [totalStarts], backgroundColor: '#ff9f40' },
-                                { label: 'Barreiras', data: [totalBarreiras], backgroundColor: '#c9cbcf' }
-                            ]
+                            labels: ['Produtividade Acumulada'],
+                            datasets: data.map(item => ({
+                                label: item.categoria__nome,
+                                data: [item.total],
+                                backgroundColor: item.categoria__cor
+                            }))
                         },
-                        options: { 
-                            plugins: { 
-                                title: { display: true, text: 'Produtividade Acumulada no Período' },
-                                datalabels: { anchor: 'center', color: '#000' } 
-                            }
-                        }
+                        options: { plugins: { datalabels: { anchor: 'center', color: '#fff' } } }
                     });
                 });
         }
