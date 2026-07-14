@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-1pi2z^&y%qo-q9&z$znjxk98)5z2rvb)&z*jawt#21yv9q9&-1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['padraopm.com.br', 'www.padraopm.com.br', '177.153.69.150','http://127.0.0.1:8000','127.0.0.1']
 
@@ -124,7 +124,7 @@ AUTH_PASSWORD_VALIDATORS = []
 
 LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'America/Sao_Paulo'
+TIME_ZONE = 'America/Cuiaba'
 
 USE_I18N = True
 

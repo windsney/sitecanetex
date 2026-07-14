@@ -8,7 +8,7 @@ from .views import (
     GerenciamentoFrotaListView, 
     ViaturaCreateView, 
     ViaturaUpdateView, 
-    ViaturaDeleteView)
+    ViaturaDeleteView,EfetivoView)
 
 from django.contrib.auth import views as auth_view
 
@@ -26,6 +26,8 @@ urlpatterns = [
     path('viatura/<int:pk>/excluir/', ViaturaDeleteView.as_view(), name='viatura_delete'),
     #path('sindicancia/editar_sindicancia/<int:id>', inicio.views.editar_sindicancia, name='editar_sindicancia'),
     #path('sindicancia/excluir_sindicancia/<int:id>', inicio.views.excluir_sindicancia, name='excluir_sindicancia'),
+
+    path('efetivo/', EfetivoView.as_view(), name='efetivo'),
    
     
 

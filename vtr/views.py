@@ -107,3 +107,9 @@ class ViaturaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
     template_name = 'viatura_confirm_delete.html'
     permission_required = 'vtr.delete_viatura' # Exige permissão de deletar
     success_url = reverse_lazy('vtr:gerenciar_frota')
+
+
+class EfetivoView(LoginRequiredMixin, ListView):
+    model = Unidade
+    template_name = 'efetivo.html'  # Apontando para o seu home.html dentro de vtr
+    context_object_name = 'unidades'

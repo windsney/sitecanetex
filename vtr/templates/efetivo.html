@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Logística - 4º Comando Regional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Configuração de Impressão (Esconde o que não é relatório) */
+        @media print {
+            .noprint, nav, button, .filter-bar, .ver-viaturas { 
+                display: none !important; 
+            }
+            body { 
+                background: white; 
+                padding: 0; 
+                color: black; 
+            }
+            .container { 
+                max-width: 100% !important; 
+                padding: 1rem !important; 
+            }
+            .shadow-lg, .shadow-md, .shadow, .shadow-sm { 
+                box-shadow: none !important; 
+                border: 1px solid #ddd; 
+            }
+            .unit-card { 
+                break-inside: avoid; 
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+    <header class="bg-gray-900 text-white p-4 shadow-md noprint">
+        <div class="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+            <div class="flex items-center space-x-3">
+                <div class="bg-green-700 p-2 rounded-lg font-bold text-lg tracking-wider">4ºCR</div>
+                <h1 class="text-xl font-bold uppercase tracking-wide hidden md:block">
+                    Sistema de Gestão de Viaturas - 4º Comando Regional
+                </h1>
+                <h1 class="text-base font-bold uppercase tracking-wide md:hidden">
+                    Gestão de Viaturas - 4º CR
+                </h1>
+            </div>
+            <div class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end">
+                <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold text-sm flex items-center space-x-2 transition-colors">
+                    <span>🖨️ Imprimir</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-6 md:p-8">
+
+        <!-- Resumo da Frota Regional -->
+        <div class="bg-white p-4 rounded-xl shadow-sm mb-8 flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0 filter-bar noprint border border-gray-200">
+            <div class="text-sm">
+                <h2 class="text-lg font-bold text-gray-800 tracking-tight">Resumo Geral (Viaturas & Efetivo)</h2>
+                <p class="text-xs text-gray-500">Dados consolidados em tempo real</p>
+            </div>
+        </div>
+
+        <!-- Cards Globais -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <!-- Viaturas Operacionais -->
+            <div class="bg-white border-2 border-green-500 p-6 rounded-2xl shadow-md flex items-center space-x-4 relative overflow-hidden">
+                <div class="absolute inset-0 bg-green-50 opacity-30"></div>
+                <div class="relative z-10 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <span class="text-green-600 text-xl font-bold">✓</span>
+                </div>
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">VTRs Operacionais</p>
+                    <p class="text-3xl font-black text-green-700 leading-none">84</p>
+                </div>
+            </div>
+            
+            <!-- Viaturas Baixadas -->
+            <div class="bg-white border-2 border-red-500 p-6 rounded-2xl shadow-md flex items-center space-x-4 relative overflow-hidden">
+                <div class="absolute inset-0 bg-red-50 opacity-30"></div>
+                <div class="relative z-10 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                    <span class="text-red-600 text-xl font-black">!</span>
+                </div>
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">VTRs Baixadas</p>
+                    <p class="text-3xl font-black text-red-700 leading-none">12</p>
+                </div>
+            </div>
+
+            <!-- Efetivo Total -->
+            <div class="bg-white border-2 border-indigo-500 p-6 rounded-2xl shadow-md flex items-center space-x-4 relative overflow-hidden">
+                <div class="absolute inset-0 bg-indigo-50 opacity-30"></div>
+                <div class="relative z-10 w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                    <span class="text-indigo-600 text-xl font-bold">👥</span>
+                </div>
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Efetivo Total</p>
+                    <p class="text-3xl font-black text-indigo-700 leading-none">142</p>
+                </div>
+            </div>
+
+            <!-- Efetivo em Serviço -->
+            <div class="bg-white border-2 border-blue-500 p-6 rounded-2xl shadow-md flex items-center space-x-4 relative overflow-hidden">
+                <div class="absolute inset-0 bg-blue-50 opacity-30"></div>
+                <div class="relative z-10 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span class="text-blue-600 text-xl font-bold">🛡️</span>
+                </div>
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Efetivo Servindo</p>
+                    <p class="text-3xl font-black text-blue-700 leading-none">98</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid de Unidades -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <!-- Exemplo de Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden unit-card">
+                <div class="bg-gray-800 text-white px-5 py-3.5 flex items-center justify-between">
+                    <h3 class="text-base font-bold tracking-wide uppercase">1º BPM</h3>
+                </div>
+                <div class="p-5 space-y-4">
+                    <!-- Barras de VTRs -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[10px] text-gray-500 font-bold"><span>VTRs</span> <span>80%</span></div>
+                        <div class="w-full bg-gray-100 h-2 rounded-full"><div class="bg-green-500 h-2 rounded-full" style="width: 80%"></div></div>
+                    </div>
+                    <!-- Dados de Efetivo -->
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 text-center">
+                        <div>
+                            <span class="block text-[9px] text-gray-400 uppercase font-bold">Efetivo</span>
+                            <span class="text-sm font-bold text-gray-800">50</span>
+                        </div>
+                        <div>
+                            <span class="block text-[9px] text-gray-400 uppercase font-bold">Serviço</span>
+                            <span class="text-sm font-bold text-blue-700">35</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- (Repetir para outras unidades) -->
+        </div>
+    </div>
+</body>
+</html>
