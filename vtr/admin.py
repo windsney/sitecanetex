@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Unidade, Viatura, ModeloViatura
+from .models import Unidade, Viatura, ModeloViatura,Policial
 
 @admin.register(ModeloViatura)
 class ModeloViaturaAdmin(admin.ModelAdmin):
@@ -51,3 +51,17 @@ class ViaturaAdmin(admin.ModelAdmin):
             'fields': ('observacao',)
         }),
     )
+
+@admin.register(Policial)
+class PolicialAdmin(admin.ModelAdmin):
+    # Colunas que aparecerão na tabela de listagem geral
+    list_display = ('posto_graduacao', 'nome_guerra', 'num_matricula', 'unidade', 'status')
+    
+    # Filtros rápidos na lateral direita para facilitar a busca do Comandante
+    list_filter = ('unidade', 'status', 'posto_graduacao')
+    
+    # Permite pesquisar digitando apenas o nome de guerra ou a matrícula do PM
+    search_fields = ('nome_guerra', 'num_matricula')
+    
+    # Permite alterar o status (Serviço, Férias, etc.) clicando direto na lista geral
+    list_editable = ('status',)

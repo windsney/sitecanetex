@@ -3,145 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Logística - 4º Comando Regional</title>
+    <title>Painel de Recursos Humanos - 4º Comando Regional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
-        /* Configuração de Impressão (Esconde o que não é relatório) */
         @media print {
-            .noprint, nav, button, .filter-bar, .ver-viaturas { 
+            .noprint, nav, button, .filter-bar, .ver-efetivo { 
                 display: none !important; 
             }
-            body { 
-                background: white; 
-                padding: 0; 
-                color: black; 
-            }
-            .container { 
-                max-width: 100% !important; 
-                padding: 1rem !important; 
-            }
-            .shadow-lg, .shadow-md, .shadow, .shadow-sm { 
-                box-shadow: none !important; 
-                border: 1px solid #ddd; 
-            }
-            .unit-card { 
-                break-inside: avoid; 
-            }
+            body { background: white; padding: 0; color: black; }
+            .container { max-width: 100% !important; padding: 1rem !important; }
+            .shadow-lg, .shadow-md, .shadow, .shadow-sm { box-shadow: none !important; border: 1px solid #ddd; }
+            .unit-card { break-inside: avoid; }
         }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
 
+    <!-- HEADER IDÊNTICO AO SEU PAINEL ORIGINAL -->
     <header class="bg-gray-900 text-white p-4 shadow-md noprint">
         <div class="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
             <div class="flex items-center space-x-3">
                 <div class="bg-green-700 p-2 rounded-lg font-bold text-lg tracking-wider">4ºCR</div>
                 <h1 class="text-xl font-bold uppercase tracking-wide hidden md:block">
-                    Sistema de Gestão de Viaturas - 4º Comando Regional
+                    Sistema de Gestão de Efetivo - 4º Comando Regional
                 </h1>
                 <h1 class="text-base font-bold uppercase tracking-wide md:hidden">
-                    Gestão de Viaturas - 4º CR
+                    Gestão de Efetivo - 4º CR
                 </h1>
             </div>
             <div class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-end">
                 <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold text-sm flex items-center space-x-2 transition-colors">
                     <span>🖨️ Imprimir</span>
                 </button>
+                
+                <div class="flex items-center space-x-3 border-l border-gray-700 pl-4">
+                    <div class="text-right hidden sm:block">
+                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Operador</span>
+                        <span class="text-xs font-semibold text-blue-400 block">
+                            👤 {{ user.get_full_name|default:user.username }}
+                        </span>
+                    </div>
+                    
+                    <form method="POST" action="{% url 'inicio:logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="text-xs font-bold bg-red-600/20 hover:bg-red-600 hover:text-white text-red-400 px-2.5 py-1.5 rounded-lg transition-all flex items-center space-x-1 cursor-pointer">
+                            <span>Sair</span>
+                            <span>🚪</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </header>
 
     <div class="container mx-auto p-6 md:p-8">
 
-        <!-- Resumo da Frota Regional -->
+        <!-- BARRA DE TITULO DO RESUMO -->
         <div class="bg-white p-4 rounded-xl shadow-sm mb-8 flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0 filter-bar noprint border border-gray-200">
             <div class="text-sm">
-                <h2 class="text-lg font-bold text-gray-800 tracking-tight">Resumo Geral (Viaturas & Efetivo)</h2>
-                <p class="text-xs text-gray-500">Dados consolidados em tempo real</p>
+                <h2 class="text-lg font-bold text-gray-800 tracking-tight">Resumo Geral do Efetivo Regional</h2>
+                <p class="text-xs text-gray-500">Distribuição de força e policiamento em tempo real pelas unidades</p>
             </div>
+            {% if perms.efetivo.view_efetivo %}
+            <div class="flex items-center space-x-3">
+                <a href="#" class="bg-gray-800 hover:bg-gray-700 text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-sm transition-all flex items-center space-x-1">
+                    <span>📋 Lançar Escala & Efetivo</span>
+                </a>
+            </div>
+            {% endif %}
         </div>
 
-        <!-- Cards Globais -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-            <!-- Viaturas Operacionais -->
-            <div class="bg-white border-2 border-green-500 p-6 rounded-2xl shadow-md flex items-center space-x-4 relative overflow-hidden">
-                <div class="absolute inset-0 bg-green-50 opacity-30"></div>
-                <div class="relative z-10 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <span class="text-green-600 text-xl font-bold">✓</span>
-                </div>
-                <div class="relative z-10">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">VTRs Operacionais</p>
-                    <p class="text-3xl font-black text-green-700 leading-none">84</p>
-                </div>
-            </div>
-            
-            <!-- Viaturas Baixadas -->
-            <div class="bg-white border-2 border-red-500 p-6 rounded-2xl shadow-md flex items-center space-x-4 relative overflow-hidden">
-                <div class="absolute inset-0 bg-red-50 opacity-30"></div>
-                <div class="relative z-10 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                    <span class="text-red-600 text-xl font-black">!</span>
-                </div>
-                <div class="relative z-10">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">VTRs Baixadas</p>
-                    <p class="text-3xl font-black text-red-700 leading-none">12</p>
-                </div>
-            </div>
-
-            <!-- Efetivo Total -->
-            <div class="bg-white border-2 border-indigo-500 p-6 rounded-2xl shadow-md flex items-center space-x-4 relative overflow-hidden">
-                <div class="absolute inset-0 bg-indigo-50 opacity-30"></div>
-                <div class="relative z-10 w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <span class="text-indigo-600 text-xl font-bold">👥</span>
-                </div>
-                <div class="relative z-10">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Efetivo Total</p>
-                    <p class="text-3xl font-black text-indigo-700 leading-none">142</p>
-                </div>
-            </div>
-
-            <!-- Efetivo em Serviço -->
-            <div class="bg-white border-2 border-blue-500 p-6 rounded-2xl shadow-md flex items-center space-x-4 relative overflow-hidden">
+        <!-- DOIS CARDS GRANDES DE DETALHAMENTO (OPERACIONAL X SERVIÇO) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <!-- Total de Policiais na Região -->
+            <div class="bg-white border-2 border-blue-500 p-6 rounded-2xl shadow-md flex items-center space-x-6 relative overflow-hidden">
                 <div class="absolute inset-0 bg-blue-50 opacity-30"></div>
-                <div class="relative z-10 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span class="text-blue-600 text-xl font-bold">🛡️</span>
+                <div class="relative z-10 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center border-4 border-blue-200">
+                    <span class="text-blue-600 text-3xl font-bold">👥</span>
                 </div>
                 <div class="relative z-10">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Efetivo Servindo</p>
-                    <p class="text-3xl font-black text-blue-700 leading-none">98</p>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Efetivo Total Pronto</p>
+                    <p class="text-5xl font-black text-blue-700 leading-none mt-1">{{ total_geral_efetivo }}</p>
+                </div>
+            </div>
+
+            <!-- Total de Policiais de Serviço Hoje -->
+            <div class="bg-white border-2 border-green-500 p-6 rounded-2xl shadow-md flex items-center space-x-6 relative overflow-hidden">
+                <div class="absolute inset-0 bg-green-50 opacity-30"></div>
+                <div class="relative z-10 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center border-4 border-green-200">
+                    <span class="text-green-600 text-3xl font-black">⚡</span>
+                </div>
+                <div class="relative z-10">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Efetivo de Serviço Hoje</p>
+                    <p class="text-5xl font-black text-green-700 leading-none mt-1">{{ total_geral_servico }}</p>
                 </div>
             </div>
         </div>
 
-        <!-- Grid de Unidades -->
+        <!-- GRID DE UNIDADES (CARDS MENORES) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <!-- Exemplo de Card -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden unit-card">
-                <div class="bg-gray-800 text-white px-5 py-3.5 flex items-center justify-between">
-                    <h3 class="text-base font-bold tracking-wide uppercase">1º BPM</h3>
+            {% for unidade in unidades %}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200 unit-card flex flex-col justify-between">
+                <div>
+                    <!-- Nome da Unidade no topo -->
+                    <div class="bg-gray-800 text-white px-5 py-3.5 flex items-center justify-between">
+                        <h3 class="text-base font-bold tracking-wide uppercase">{{ unidade.sigla }}</h3>
+                        <span class="text-gray-400 text-xs">🛡️</span>
+                    </div>
+                    
+                    <div class="p-5 space-y-4">
+                        <div class="text-xs text-gray-400 font-bold uppercase tracking-wider h-4 overflow-hidden truncate">
+                            {{ unidade.nome }}
+                        </div>
+                        
+                        <!-- Barra 1: Quantos estão de serviço / Efetivo total da unidade -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-green-700 font-bold">⚡ De Serviço</span>
+                                <span class="font-mono text-gray-900 font-bold bg-green-50 px-2 py-0.5 rounded border border-green-200">
+                                    {{ unidade.de_servico }} / {{ unidade.efetivo_total }} <span class="text-gray-400 font-normal">({{ unidade.pct_servico }}%)</span>
+                                </span>
+                            </div>
+                            <!-- Barra de progresso protegida contra erro no VS Code -->
+                            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-green-500 h-2.5 rounded-full transition-all duration-500" style="--w: {{ unidade.pct_servico }}; width: calc(var(--w) * 1%);"></div>
+                            </div>
+                        </div>
+
+                        <!-- Barra 2: Força Indisponível (Férias, Licenças, Afastamentos) -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-gray-500 font-bold">💤 Outras Situações</span>
+                                <span class="font-mono text-gray-900 font-bold bg-gray-50 px-2 py-0.5 rounded border border-gray-200">
+                                    {{ unidade.afastados }} / {{ unidade.efetivo_total }} <span class="text-gray-400 font-normal">({{ unidade.pct_afastados }}%)</span>
+                                </span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="bg-gray-400 h-2.5 rounded-full transition-all duration-500" style="--w: {{ unidade.pct_afastados }}; width: calc(var(--w) * 1%);"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="p-5 space-y-4">
-                    <!-- Barras de VTRs -->
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-[10px] text-gray-500 font-bold"><span>VTRs</span> <span>80%</span></div>
-                        <div class="w-full bg-gray-100 h-2 rounded-full"><div class="bg-green-500 h-2 rounded-full" style="width: 80%"></div></div>
-                    </div>
-                    <!-- Dados de Efetivo -->
-                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 text-center">
-                        <div>
-                            <span class="block text-[9px] text-gray-400 uppercase font-bold">Efetivo</span>
-                            <span class="text-sm font-bold text-gray-800">50</span>
-                        </div>
-                        <div>
-                            <span class="block text-[9px] text-gray-400 uppercase font-bold">Serviço</span>
-                            <span class="text-sm font-bold text-blue-700">35</span>
-                        </div>
-                    </div>
+
+                <!-- Botão de ação inferior para ver a escala nominal -->
+                <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-end ver-efetivo noprint">
+                    <a href="{% url 'vtr:efetivo_nominal' unidade.pk %}" class="text-blue-600 hover:text-blue-800 font-bold text-xs uppercase tracking-wider flex items-center space-x-1 group">
+                        <span>Ver Efetivo Nominal</span>
+                        <span class="transform group-hover:translate-x-1 transition-transform">&rarr;</span>
+                    </a>
                 </div>
             </div>
-            <!-- (Repetir para outras unidades) -->
+            {% empty %}
+            <div class="col-span-1 sm:col-span-2 lg:col-span-4 text-center py-16 text-gray-500 bg-white rounded-2xl shadow-sm border border-gray-200">
+                <p class="text-base font-semibold">Nenhuma unidade com efetivo mapeado.</p>
+            </div>
+            {% endfor %}
         </div>
     </div>
+
+    <!-- FOOTER MANTENDO OS CRÉDITOS -->
+    <footer class="mt-12 pb-6 text-center noprint">
+        <div class="inline-flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs text-gray-500 bg-white px-6 py-3 rounded-xl shadow-sm border border-gray-200">
+            <span class="font-semibold text-gray-700">Desenvolvido por Maj PM Windsney</span>
+            <div class="hidden sm:block h-3 w-px bg-gray-300"></div>
+            <div class="flex items-center space-x-2 text-gray-600 font-medium">
+                <span>💬 Dúvidas & Sugestões:</span>
+                <a href="https://wa.me/5565996912053" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold underline transition-all">(65) 99691-2053</a>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

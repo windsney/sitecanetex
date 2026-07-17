@@ -147,3 +147,58 @@ class Viatura(models.Model):
     def __str__(self):
         identificacao = self.prefixo if self.prefixo else self.placa
         return f"{self.modelo_veiculo.modelo} ({identificacao}) - {self.unidade.sigla}"
+
+
+###########parte do Efetivo ##########################
+
+class Policial(models.Model):
+    # Lista oficial de Graduações pedidas pelo Comandante para seleção direta
+    GRADUACAO_CHOICES = [
+        ('Al Sd PM', 'Al Sd PM (Aluno Soldado)'),
+        ('Sd PM', 'Sd PM (Soldado)'),
+        ('Cb PM', 'Cb PM (Cabo)'),
+        ('3º Sgt PM', '3º Sgt PM (Terceiro Sargento)'),
+        ('2º Sgt PM', '2º Sgt PM (Segundo Sargento)'),
+        ('1º Sgt PM', '1º Sgt PM (Primeiro Sargento)'),
+        ('Sub Ten PM', 'Sub Ten Ten PM (Subtenente)'),
+        ('Asp Of PM', 'Asp Of PM (Aspirante a Oficial)'),
+        ('2º Ten PM', '2º Ten PM (Segundo Tenente)'),
+        ('1º Ten PM', '1º Ten PM (Primeiro Tenente)'),
+        ('Cap PM', 'Cap PM (Capitão)'),
+        ('Maj PM', 'Maj PM (Major)'),
+        ('Ten Cel PM', 'Ten Cel PM (Tenente Coronel)'),
+        ('Cel PM', 'Cel PM (Coronel)'),
+    ]
+
+    STATUS_CHOICES = [
+        ('SERVICO', 'De Serviço (Pronto)'),
+        ('EXPEDIENTE', 'Expediente Comum'),
+        ('FERIAS', 'Férias'),
+        ('LICENCA', 'Licença Médica/Tratamento'),
+        ('DISPENSA', 'Dispensa como Recompensa/Nupcial'),
+        ('AFASTADO', 'Outros Afastamentos'),
+    ]
+
+    # Vinculação com a Unidade que já existe no seu app vtr
+    unidade = models.ForeignKey('Unidade', on_delete=models.CASCADE, related_name='policiais', verbose_name="Unidade")
+    
+    # Campo alterado para ChoiceField: agora gera uma lista de seleção automática
+    posto_graduacao = models.CharField(
+        max_length=15, 
+        choices=GRADUACAO_CHOICES, 
+        default='Sd PM', 
+        verbose_name="Posto/Graduação"
+    )
+    
+    nome_guerra = models.CharField(max_length=50, verbose_name="Nome de Guerra")
+    num_matricula = models.CharField(max_length=20, unique=True, verbose_name="Matrícula/RE")
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='EXPEDIENTE', verbose_name="Situação Atual")
+    observacao = models.TextField(max_length=255, blank=True, null=True, verbose_name="Observações")
+
+    class Meta:
+        verbose_name = "Policial"
+        verbose_name_plural = "Efetivo Nominal"
+        ordering = ['unidade', 'nome_guerra']
+
+    def __str__(self):
+        return f"{self.posto_graduacao} PM {self.nome_guerra} - Matrícula: {self.num_matricula}"

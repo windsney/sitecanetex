@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Efetivo Nominal - {{ unidade.sigla }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-6 md:p-8">
+
+    <!-- BARRA SUPERIOR COM BOTÃO VOLTAR -->
+    <div class="bg-white p-4 rounded-xl shadow-sm mb-8 flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0 border border-gray-200 noprint">
+        <div class="text-sm">
+            <h2 class="text-xl font-bold text-gray-800 tracking-tight">Efetivo Nominal — {{ unidade.sigla }}</h2>
+            <p class="text-xs text-gray-500">{{ unidade.nome }}</p>
+        </div>
+        
+        <!-- BOTÃO VOLTAR PARA O PAINEL ANTERIOR -->
+        <div>
+            <a href="{% url 'vtr:efetivo' %}" class="inline-flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition-all">
+                <span>&larr; Voltar ao Painel Geral</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- TABELA NOMINAL COMPLETA -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-800 text-white text-xs uppercase tracking-wider font-semibold">
+                        <th class="px-6 py-4">Graduação</th>
+                        <th class="px-6 py-4">Nome de Guerra</th>
+                        <th class="px-6 py-4">Matrícula/RE</th>
+                        <th class="px-6 py-4 text-center">Situação Atual</th>
+                        <th class="px-6 py-4">Observações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
+                    {% for policial in policiais %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 font-bold text-gray-900">{{ policial.posto_graduacao }}</td>
+                        <td class="px-6 py-4 font-medium">{{ policial.nome_guerra }}</td>
+                        <td class="px-6 py-4 font-mono text-xs text-gray-500">{{ policial.num_matricula }}</td>
+                        <td class="px-6 py-4 text-center">
+                            <!-- Crachás de Status Dinâmicos combinando com o painel -->
+                            {% if policial.status == 'SERVICO' or policial.status == 'EXPEDIENTE' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
+                                ⚡ {{ policial.get_status_display }}
+                            </span>
+                            {% elif policial.status == 'FERIAS' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                🌴 {{ policial.get_status_display }}
+                            </span>
+                            {% elif policial.status == 'LICENCA' %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
+                                🏥 {{ policial.get_status_display }}
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200">
+                                📋 {{ policial.get_status_display }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-xs text-gray-500 italic max-w-xs truncate">
+                            {{ policial.observacao|default:"-" }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-400 font-medium">
+                            <p class="text-base">Nenhum policial cadastrado nominalmente nesta unidade.</p>
+                            <p class="text-xs mt-1">Acesse o painel de administração para cadastrar o efetivo.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
