@@ -25,6 +25,7 @@ urlpatterns = [
     path('', include('cd.urls',namespace='cd')),
     path('', include('vtr.urls',namespace='vtr')),
     path('', include('produtividade.urls',namespace='produtividade')),
+    path('', include('efetivo.urls',namespace='efetivo')),
 ]
 
 urlpatterns = urlpatterns +  static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'cd',
     'vtr',
     'produtividade',
+    'efetivo',
+    
     
 ]
 
