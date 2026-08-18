@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect
-from .models import PontoFixo, EscalaDiaria, CartaoPoliciamento, Policial, ValorHoraCategoria
+from django.shortcuts import render, redirect,get_object_or_404
+from .models import Unidade,PontoFixo, EscalaDiaria, CartaoPoliciamento, Policial, ValorHoraCategoria
 from datetime import datetime, date
 from django.urls import reverse
 from django.http import HttpResponse
@@ -14,6 +14,8 @@ from reportlab.lib import colors
 
 def cadastrar_policial(request):
     if request.method == "POST":
+        unidade_id = request.POST.get('unidade')
+        unidade_instancia = Unidade.objects.get(pk=unidade_id) if unidade_id else None
         # Coleta os campos obrigatórios
         nome = request.POST.get('nome_guerra')
         categoria = request.POST.get('categoria')
@@ -36,6 +38,7 @@ def cadastrar_policial(request):
                 nome_guerra=nome,
                 categoria=categoria,
                 rgpm=rgpm,
+                unidade=unidade_instancia,
                 cpf=cpf,
                 posto_graduacao=posto_graduacao,
                 endereco=endereco,
@@ -49,12 +52,14 @@ def cadastrar_policial(request):
             )
         return redirect('efetivo:cadastrar_policial')
         
-    policiais = Policial.objects.all()
+   
     categorias = ValorHoraCategoria.CATEGORIAS
     postos = Policial.POSTOS_GRADUACOES
     
     context = {
-        'policiais': policiais, 
+        
+        'unidades': Unidade.objects.all(),  # Passa as unidades para o template
+        'policiais': Policial.objects.select_related('unidade').all(), 
         'categorias': categorias,
         'postos': postos
     }
@@ -398,3 +403,53 @@ def gerar_pdf_fichas_ponto(request):
 
     doc.build(elements)
     return response
+
+
+
+def efetivo_unidade_grade(request, unidade_id):
+    unidade = get_object_or_404(Unidade, pk=unidade_id)
+    
+    # Hierarquia oficial (do mais antigo ao mais moderno)
+    ordem_hierarquica = [
+        'CEL PM', 'TEN CEL PM', 'MAJ PM', 'CAP PM', 
+        '1TEN PM', '2TEN PM', 'ASP OF PM', 'SUB TEN PM', 
+        '1SGT PM', '2SGT PM', '3SGT PM', 'CB PM', 'SD PM'
+    ]
+
+    policiais_unidade = Policial.objects.filter(unidade=unidade)
+    efetivo_por_graduacao = []
+    
+    for sigla_posto in ordem_hierarquica:
+        # Ordena por RGPM (menor RGPM = mais antigo) dentro da mesma graduação
+        pms_grad = policiais_unidade.filter(posto_graduacao=sigla_posto).order_by('rgpm')
+        
+        if pms_grad.exists():
+            nome_graduacao = pms_grad.first().get_posto_graduacao_display()
+            efetivo_por_graduacao.append({
+                'graduacao_nome': nome_graduacao,
+                'policiais': pms_grad
+            })
+
+    context = {
+        'unidade': unidade,
+        'efetivo_por_graduacao': efetivo_por_graduacao,
+        'total_efetivo': policiais_unidade.count(),
+    }
+    return render(request, 'efetivo_grade.html', context)
+
+
+def dashboard_efetivo(request):
+    unidades = Unidade.objects.prefetch_related('policiais').all()
+    
+    total_efetivo = Policial.objects.count()
+    # Exemplo: caso tenha um campo de status ou escala ativa no model Policial/Escala
+    em_servico = Policial.objects.filter(em_servico=True).count() if hasattr(Policial, 'em_servico') else 12
+    de_folga = total_efetivo - em_servico if total_efetivo >= em_servico else 0
+
+    context = {
+        'unidades': unidades,
+        'total_efetivo': total_efetivo,
+        'em_servico': em_servico,
+        'de_folga': de_folga,
+    }
+    return render(request, 'dashboard_efetivo.html', context)

@@ -22,7 +22,8 @@
                 {% csrf_token %}
                 
                 <h2 class="text-sm font-bold text-blue-900 uppercase border-b pb-1 mb-4 tracking-wide">1. Dados Militares & Folha</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <!-- Alterado para md:grid-cols-5 para acomodar a Unidade ao lado do RGPM -->
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">Posto / Graduação</label>
                         <select name="posto_graduacao" required class="w-full border rounded p-2 text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500">
@@ -39,6 +40,16 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">RGPM</label>
                         <input type="text" name="rgpm" placeholder="Ex: 123.456" required class="w-full border rounded p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <!-- CAMPO UNIDADE ADICIONADO AO LADO DO RGPM -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Unidade</label>
+                        <select name="unidade" required class="w-full border rounded p-2 text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Selecione a Unidade --</option>
+                            {% for u in unidades %}
+                                <option value="{{ u.id }}">{{ u.sigla }} - {{ u.nome }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">Categoria de Custo</label>
@@ -104,6 +115,7 @@
             </form>
         </div>
 
+        <!-- Tabela do Efetivo com Coluna da Unidade Adicionada -->
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Efetivo Cadastrado ({{ policiais.count }})</h2>
             <div class="overflow-x-auto">
@@ -113,6 +125,7 @@
                             <th class="p-3">Posto/Grad</th>
                             <th class="p-3">Nome de Guerra</th>
                             <th class="p-3">RGPM</th>
+                            <th class="p-3">Unidade</th>
                             <th class="p-3">CPF</th>
                             <th class="p-3">Telefone</th>
                             <th class="p-3">Categoria</th>
@@ -124,6 +137,7 @@
                             <td class="p-3 font-semibold">{{ pm.get_posto_graduacao_display }}</td>
                             <td class="p-3 font-bold text-blue-900">{{ pm.nome_guerra }}</td>
                             <td class="p-3 font-mono">{{ pm.rgpm }}</td>
+                            <td class="p-3 font-bold text-gray-800">{{ pm.unidade.sigla|default:"---" }}</td>
                             <td class="p-3 font-mono">{{ pm.cpf }}</td>
                             <td class="p-3">{{ pm.telefone|default:"---" }}</td>
                             <td class="p-3"><span class="bg-gray-200 text-gray-800 text-xs px-2 py-0.5 rounded font-bold">{{ pm.get_categoria_display }}</span></td>
