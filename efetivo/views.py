@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect,get_object_or_404
-from .models import Unidade,PontoFixo, EscalaDiaria, CartaoPoliciamento, Policial, ValorHoraCategoria
+from .models import Unidade,PontoFixo, EscalaDiaria, CartaoPoliciamento, Policial, ValorHoraCategoria,BlocoHorarioCartao,CartaoPrograma,ChecagemLocal,EscalaDiaria
 from datetime import datetime, date
 from django.urls import reverse
 from django.http import HttpResponse
@@ -71,22 +71,16 @@ def painel_escala(request):
     
     if data_str:
         try:
-            data_selecionada = datetime.strptime(data_str, '%Y-%m-%d').date()
-            escala = EscalaDiaria.objects.filter(data=data_selecionada).first()
-            if not escala:
-                escala = EscalaDiaria(data=data_selecionada)
+           data_selecionada = datetime.strptime(data_str, '%Y-%m-%d').date()
         except ValueError:
             data_selecionada = date.today()
-            escala = EscalaDiaria.objects.filter(data=data_selecionada).first()
     else:
         data_selecionada = date.today()
-        escala = EscalaDiaria.objects.filter(data=data_selecionada).first() or EscalaDiaria.objects.order_by('-data').first()
-        if escala:
-            data_selecionada = escala.data
-        else:
-            escala = EscalaDiaria(data=data_selecionada)
 
-    # Passamos todos os pontos fixos disponíveis para carregar as opções da lista suspensa
+    # Garante que SEMPRE existirá uma EscalaDiaria para a data selecionada no banco
+    # Evita que o ID seja None ao tentar abrir uma data nova
+    escala, created = EscalaDiaria.objects.get_or_create(data=data_selecionada)
+
     pontos_fixos_disponiveis = PontoFixo.objects.all()
     todos_policiais = Policial.objects.all()
     
@@ -116,7 +110,7 @@ def painel_escala(request):
             id_duplicado = max(set(militares_escalados), key=militares_escalados.count)
             militar_duplicado = Policial.objects.filter(id=id_duplicado).first()
             messages.error(request, f"Erro: O militar {militar_duplicado} foi inserido em mais de uma vaga/posto no mesmo dia!")
-            return redirect(f"{reverse('painel_escala')}?data_busca={data_escala}")
+            return redirect(f"{reverse('efetivo:painel_escala')}?data_busca={data_escala}")
         # ===========================================================================
 
         # Cria ou obtém a escala do dia
@@ -159,7 +153,7 @@ def painel_escala(request):
                 )
         
         messages.success(request, "Escala salva com sucesso!")
-        return redirect(f"{reverse('painel_escala')}?data_busca={data_escala}")
+        return redirect(f"{reverse('efetivo:painel_escala')}?data_busca={data_escala}")
 
     dados_tabela = []
     custo_total_escala = 0
@@ -194,6 +188,124 @@ def painel_escala(request):
         'custo_total': custo_total_escala,
     }
     return render(request, 'painel.html', context)
+
+
+def admin_criar_cartao_programa(request, escala_id):
+  escala_obj = get_object_or_404(EscalaDiaria, id=escala_id)
+  pontos_disponiveis = PontoFixo.objects.all()
+
+  if request.method == 'POST':
+    cartao, created = CartaoPrograma.objects.get_or_create(escala=escala_obj)
+    cartao.blocos.all().delete()
+
+    for i in range(1, 5):
+      h_inicio = request.POST.get(f'bloco_{i}_inicio')
+      h_fim = request.POST.get(f'bloco_{i}_fim')
+
+      if h_inicio and h_fim:
+        bloco = BlocoHorarioCartao.objects.create(
+            cartao=cartao,
+            ordem=i,
+            horario_inicio=h_inicio,
+            horario_fim=h_fim,
+        )
+
+        locais_ids = request.POST.getlist(f'bloco_{i}_locais[]')
+        for ponto_id in locais_ids:
+          if ponto_id:
+            ChecagemLocal.objects.create(
+                bloco=bloco, ponto_fixo_id=ponto_id
+            )
+
+    messages.success(
+        request, 'Cartão-Programa configurado com sucesso pelo Administrador!'
+    )
+    return redirect('efetivo:painel_escala')
+
+  context = {
+      'escala': escala_obj,
+      'pontos_disponiveis': pontos_disponiveis,
+  }
+  return render(request, 'admin_cartao_form.html', context)
+
+
+def salvar_cartao_programa(request, escala_id):
+  if request.method == 'POST':
+    lista_locais_id = request.POST.getlist('local_id[]')
+
+    for local_id in lista_locais_id:
+      local_obj = ChecagemLocal.objects.filter(id=local_id).first()
+      if local_obj:
+        # Pega o arquivo de foto enviado para este local específico
+        foto_arquivo = request.FILES.get(f'foto_comprovacao_{local_id}')
+
+        if foto_arquivo:
+          local_obj.foto_comprovacao = foto_arquivo
+          # Salva o horário exato em que o usuário clicou em salvar com a foto
+          local_obj.horario_registro = timezone.now()
+          local_obj.realizado = True
+          local_obj.save()
+
+    messages.success(request, 'Fotos do Cartão-Programa salvas com sucesso!')
+    return redirect('efetivo:painel_escala')
+
+  # Parte para renderizar a página com os 4 blocos cadastrados pelo Admin
+  blocos_horarios = BlocoHorarioCartao.objects.filter(
+      cartao__escala_id=escala_id
+  ).prefetch_related('locais__ponto_fixo')
+
+  context = {
+      'blocos_horarios': blocos_horarios,
+      'data_escala': (
+          blocos_horarios.first().cartao.escala.data
+          if blocos_horarios.exists()
+          else None
+      ),
+  }
+  return render(request, 'cartao_programa.html', context)
+
+def admin_criar_cartao_programa(request, escala_id):
+  escala_obj = get_object_or_404(EscalaDiaria, id=escala_id)
+  pontos_disponiveis = PontoFixo.objects.all()
+
+  if request.method == 'POST':
+    # Cria o Cartão-Programa principal para esta escala
+    cartao, created = CartaoPrograma.objects.get_or_create(escala=escala_obj)
+
+    # Limpa blocos anteriores se o admin estiver reeditando
+    cartao.blocos.all().delete()
+
+    # Como são 4 blocos (conforme o desenho), vamos iterar de 1 a 4
+    for i in range(1, 5):
+      h_inicio = request.POST.get(f'bloco_{i}_inicio')
+      h_fim = request.POST.get(f'bloco_{i}_fim')
+
+      if h_inicio and h_fim:
+        bloco = BlocoHorarioCartao.objects.create(
+            cartao=cartao,
+            ordem=i,
+            horario_inicio=h_inicio,
+            horario_fim=h_fim,
+        )
+
+        # Pega os locais (pontos fixos) escolhidos para este bloco (ex: Local 1 e Local 2)
+        locais_ids = request.POST.getlist(f'bloco_{i}_locais[]')
+        for ponto_id in locais_ids:
+          if ponto_id:
+            ChecagemLocal.objects.create(
+                bloco=bloco, ponto_fixo_id=ponto_id
+            )
+
+    messages.success(
+        request, 'Cartão-Programa configurado com sucesso pelo Administrador!'
+    )
+    return redirect('efetivo:painel_escala')
+
+  context = {
+      'escala': escala_obj,
+      'pontos_disponiveis': pontos_disponiveis,
+  }
+  return render(request, 'admin_cartao_form.html', context) 
 
 
 # VISUALIZAÇÃO ATUALIZADA: Histórico e busca para os policiais

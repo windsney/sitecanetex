@@ -1,0 +1,69 @@
+{% extends 'base.html' %} <!-- Substitua 'base.html' pelo nome do arquivo de layout base do seu sistema se for diferente -->
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-6 px-4">
+    <form method="POST" class="bg-white p-6 rounded-lg shadow-md space-y-6">
+        {% csrf_token %}
+        
+        <div class="border-b pb-4 mb-4 flex justify-between items-center">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">Configurar Cartão-Programa</h2>
+                <p class="text-xs text-gray-500 mt-1">Escala do dia: <span class="font-semibold text-blue-900">{{ escala.data|date:"d/m/Y" }}</span></p>
+            </div>
+            <a href="{% url 'efetivo:painel_escala' %}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-3 rounded text-xs transition-colors">
+                ⬅ Voltar
+            </a>
+        </div>
+
+        <!-- Loop fixo para os 4 blocos desenhados -->
+        <div class="space-y-4">
+            {% for i in "1234"|make_list %}
+            <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 space-y-3 shadow-sm">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h3 class="font-bold text-blue-900 text-sm">Bloco / Turno {{ i }}</h3>
+                    <span class="text-[10px] bg-blue-100 text-blue-800 font-semibold px-2 py-0.5 rounded">Parte {{ i }} de 4</span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Horário Início:</label>
+                        <input type="time" name="bloco_{{ i }}_inicio" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none bg-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Horário Fim:</label>
+                        <input type="time" name="bloco_{{ i }}_fim" class="w-full border border-gray-300 rounded p-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none bg-white" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Local 1:</label>
+                        <select name="bloco_{{ i }}_locais[]" class="w-full border border-gray-300 rounded p-2 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none">
+                            <option value="">-- Selecione o Local 1 --</option>
+                            {% for pf in pontos_disponiveis %}
+                            <option value="{{ pf.id }}">{{ pf.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Local 2:</label>
+                        <select name="bloco_{{ i }}_locais[]" class="w-full border border-gray-300 rounded p-2 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none">
+                            <option value="">-- Selecione o Local 2 --</option>
+                            {% for pf in pontos_disponiveis %}
+                            <option value="{{ pf.id }}">{{ pf.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="flex justify-end pt-4 border-t">
+            <button type="submit" class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-2.5 px-6 rounded shadow transition-colors text-xs flex items-center gap-2">
+                💾 Salvar Estrutura do Cartão-Programa
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

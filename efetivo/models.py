@@ -220,3 +220,41 @@ class ItemEscalaNormal(models.Model):
 
     def __str__(self):
         return f"{self.policial} - {self.funcao}"
+
+
+class CartaoPrograma(models.Model):
+  # Vinculado à escala diária ou diretamente a uma data
+  escala = models.ForeignKey('EscalaDiaria', on_delete=models.CASCADE)
+  criado_em = models.DateTimeField(auto_now_add=True)
+
+  def __str__(self):
+    return f'Cartão-Programa - Escala de {self.escala.data}'
+
+
+class BlocoHorarioCartao(models.Model):
+  cartao = models.ForeignKey(
+      CartaoPrograma, related_name='blocos', on_delete=models.CASCADE
+  )
+  ordem = models.IntegerField(default=1)  # 1 a 4 (conforme o seu desenho)
+  horario_inicio = models.TimeField()
+  horario_fim = models.TimeField()
+
+  def __str__(self):
+    return f'Turno {self.ordem}: {self.horario_inicio} às {self.horario_fim}'
+
+
+class ChecagemLocal(models.Model):
+  bloco = models.ForeignKey(
+      BlocoHorarioCartao, related_name='locais', on_delete=models.CASCADE
+  )
+  ponto_fixo = models.ForeignKey(
+      'PontoFixo', on_delete=models.CASCADE
+  )  # O local cadastrado
+  foto_comprovacao = models.ImageField(
+      upload_to='cartao_programa/', null=True, blank=True
+  )
+  horario_registro = models.DateTimeField(null=True, blank=True)
+  realizado = models.BooleanField(default=False)
+
+  def __str__(self):
+    return f'Local: {self.ponto_fixo.nome}'

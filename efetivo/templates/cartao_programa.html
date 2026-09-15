@@ -1,0 +1,61 @@
+<form method="POST" enctype="multipart/form-data" class="max-w-4xl mx-auto space-y-6">
+    {% csrf_token %>
+
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-gray-800">Cartão-Programa Operacional</h2>
+        <span class="text-xs bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded">Data: {{ data_escala|date:"d/m/Y" }}</span>
+    </div>
+
+    <!-- Loop para renderizar as 4 partes cadastradas pelo Admin -->
+    {% for bloco in blocos_horarios %}
+    <div class="bg-white border border-gray-300 rounded-lg shadow-sm p-5">
+        
+        <!-- Cabeçalho com o Horário definido pelo Admin -->
+        <div class="border-b pb-3 mb-4 flex justify-between items-center bg-gray-50 -mx-5 -mt-5 p-4 rounded-t-lg">
+            <h3 class="font-bold text-blue-900 text-base">
+                Cartão Programa — Horário: {{ bloco.horario_inicio|time:"H:i" }} às {{ bloco.horario_fim|time:"H:i" }}
+            </h3>
+            <span class="text-xs text-gray-500 font-semibold">Bloco {{ forloop.counter }} de 4</span>
+        </div>
+
+        <!-- Locais definidos pelo Admin, onde o usuário apenas carrega a foto -->
+        <div class="space-y-4">
+            {% for local in bloco.locais.all %}
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-50 p-3 rounded border gap-4">
+                
+                <!-- Local fixo (Apenas exibição ou campo hidden) -->
+                <div class="w-full md:w-1/3">
+                    <span class="block text-[10px] uppercase font-bold text-gray-400">Local Definido:</span>
+                    <span class="text-xs font-bold text-gray-800">{{ local.ponto_fixo.nome }}</span>
+                    <!-- Passa o ID do local para sabermos onde salvar a foto -->
+                    <input type="hidden" name="local_id[]" value="{{ local.id }}">
+                </div>
+
+                <!-- Campo para o usuário carregar a foto -->
+                <div class="w-full md:w-1/2">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Carregar Foto de Comprovação:</label>
+                    <input type="file" name="foto_comprovacao_{{ local.id }}" accept="image/*" class="w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    
+                    {% if local.foto_comprovacao %}
+                        <div class="mt-1 text-[11px]">
+                            <span class="text-green-600 font-semibold">✔ Foto já enviada:</span> 
+                            <a href="{{ local.foto_comprovacao.url }}" target="_blank" class="text-blue-600 underline">Ver imagem</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+    {% endfor %}
+
+    <!-- Botão Salvar Geral -->
+    <div class="flex justify-end pt-4">
+        <button type="submit" class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors text-sm">
+            💾 Salvar Fotos do Cartão
+        </button>
+    </div>
+
+</form>

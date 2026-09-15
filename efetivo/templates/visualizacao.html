@@ -22,7 +22,7 @@
             <h3 class="font-bold text-slate-700 mb-2 text-sm uppercase tracking-wide">Escalas Publicadas</h3>
             <div class="space-y-1 max-h-60 overflow-y-auto pr-1">
                 {% for hist in historico %}
-                <a href="{% url 'visualizacao_escala' %}?data_busca={{ hist.data|date:'Y-m-d' }}" 
+                <a href="{% url 'efetivo:visualizacao_escala' %}?data_busca={{ hist.data|date:'Y-m-d' }}" 
                    class="block p-2 rounded text-sm font-medium {% if escala.data == hist.data %}bg-blue-50 text-blue-900 border-l-4 border-blue-900{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
                     📅 {{ hist.data|date:"d/m/Y" }}
                 </a>
