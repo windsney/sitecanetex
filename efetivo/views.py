@@ -308,6 +308,9 @@ def admin_criar_cartao_programa(request, escala_id):
   return render(request, 'admin_cartao_form.html', context) 
 
 
+
+
+
 # VISUALIZAÇÃO ATUALIZADA: Histórico e busca para os policiais
 def visualizacao_escala(request):
     data_str = request.GET.get('data_busca')
