@@ -262,7 +262,7 @@ def salvar_cartao_programa(request, escala_id):
           else None
       ),
   }
-  return render(request, 'cartao_programa.html', context)
+  return render(request, 'registrar_atividade.html', context)
 
 def admin_criar_cartao_programa(request, escala_id):
   escala_obj = get_object_or_404(EscalaDiaria, id=escala_id)

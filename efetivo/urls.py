@@ -1,7 +1,7 @@
 from django.urls import path
 
 import efetivo.views
-from .views import (cadastrar_policial,painel_escala,visualizacao_escala,gerar_pdf_fichas_ponto,efetivo_unidade_grade,dashboard_efetivo,admin_criar_cartao_programa)
+from .views import (cadastrar_policial,painel_escala,visualizacao_escala,gerar_pdf_fichas_ponto,efetivo_unidade_grade,dashboard_efetivo,admin_criar_cartao_programa,salvar_cartao_programa)
 
 from django.contrib.auth import views as auth_view
 
@@ -16,6 +16,7 @@ urlpatterns = [
     path('efetivo/unidade/<int:unidade_id>/', efetivo_unidade_grade, name='efetivo_unidade_grade'),
     path('pessoal/', dashboard_efetivo, name='dash'),
     path('cartao-programa/configurar/<int:escala_id>/', admin_criar_cartao_programa, name='configurar_cartao_programa'),
+    path('cartao-programa/enviar/<int:escala_id>/', salvar_cartao_programa, name='salvar_cartao_programa'),
     #path('sobre/', views.sobre, name='sobre'),
     #path('contato/', views.contato, name='contato'),
 # CBV básica
