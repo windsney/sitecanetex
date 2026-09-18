@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.http import HttpResponse
 from django.db.models import Q
 from django.contrib import messages
+from django.conf import settings
 
 # Imports do ReportLab para construir o PDF
 from reportlab.lib.pagesizes import letter
@@ -12,8 +13,10 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
 
 import io
+import os
 import zipfile
 from datetime import datetime
 from openpyxl import Workbook
@@ -669,7 +672,33 @@ def gerar_recibo(request):
                 pdf_buffer = io.BytesIO()
                 p = canvas.Canvas(pdf_buffer, pagesize=letter)
                 width, height = letter
-                
+
+                caminho_imagem = os.path.join(settings.BASE_DIR, 'efetivo', 'static', 'efetivo', 'images', 'prefeitura.jpg')
+
+# Alternativa caso o arquivo esteja na pasta de arquivos estáticos (static):
+# caminho_imagem = finders.find('images/prefeitura.jpg')
+
+                if caminho_imagem and os.path.exists(caminho_imagem):
+                    img_width = 70   # Largura da logo em pontos
+                    img_height = 70  # Altura da logo em pontos
+                    
+                    # Centraliza horizontalmente
+                    x_pos = (width - img_width) / 2.0 
+                    y_pos = height - 85  # Distância a partir do topo
+                    
+                    try:
+                        p.drawImage(
+                            caminho_imagem,  # Pode passar a string com o caminho absoluto diretamente
+                            x_pos,
+                            y_pos,
+                            width=img_width,
+                            height=img_height,
+                            preserveAspectRatio=True,
+                            mask='auto',
+                        )
+                    except Exception as e:
+                        print(f"Erro ao inserir imagem no PDF: {e}")
+                    
                 # Cabeçalho do Recibo
                 p.setFont("Helvetica-Bold", 12)
                 p.drawCentredString(width / 2.0, height - 50, "RECIBO - GABINETE DE APOIO À SEGURANÇA PÚBLICA")
