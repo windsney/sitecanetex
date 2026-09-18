@@ -11,6 +11,15 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
+from reportlab.pdfgen import canvas
+
+import io
+import zipfile
+from datetime import datetime
+from openpyxl import Workbook
+
+
+
 
 def cadastrar_policial(request):
     if request.method == "POST":
@@ -568,3 +577,147 @@ def dashboard_efetivo(request):
         'de_folga': de_folga,
     }
     return render(request, 'dashboard_efetivo.html', context)
+
+
+def gerar_recibo(request):
+    if request.method == 'POST':
+        data_inicio_str = request.POST.get('data_inicio')
+        data_fim_str = request.POST.get('data_fim')
+        
+        try:
+            data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d').date()
+            data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            return HttpResponse("Datas inválidas informadas.", status=400)
+        
+        # 1. Buscar os valores por hora de cada categoria cadastrada
+        tabela_valores = {
+            v.categoria: float(v.valor_por_hora) 
+            for v in ValorHoraCategoria.objects.all()
+        }
+
+        # 2. Buscar todos os cartões de policiamento no intervalo de datas da EscalaDiaria
+        cartoes = CartaoPoliciamento.objects.filter(
+            escala__data__range=[data_inicio, data_fim]
+        ).select_related('escala', 'comandante', 'motorista', 'patrulheiro')
+
+        if not cartoes.exists():
+            return HttpResponse("Nenhum registro de policiamento encontrado para o período selecionado.", status=404)
+
+        # Dicionário para consolidar os dados por policial: { policial_id: {dados...} }
+        totais_por_militar = {}
+
+        for cartao in cartoes:
+            horas_cartao = cartao.total_horas
+            
+            # Funções que participam do cartão
+            membros = [cartao.comandante, cartao.motorista, cartao.patrulheiro]
+            
+            for pm in membros:
+                if pm:
+                    if pm.id not in totais_por_militar:
+                        totais_por_militar[pm.id] = {
+                            'militar': pm,
+                            'total_horas': 0.0,
+                            'total_valor': 0.0
+                        }
+                    
+                    # Pega o valor da hora da categoria do policial
+                    valor_hora = tabela_valores.get(pm.categoria, 0.0)
+                    
+                    totais_por_militar[pm.id]['total_horas'] += horas_cartao
+                    totais_por_militar[pm.id]['total_valor'] += (horas_cartao * valor_hora)
+
+        if not totais_por_militar:
+            return HttpResponse("Não há policiais vinculados aos cartões no período.", status=404)
+
+        # 3. Criar a Planilha Excel Consolidada
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Consolidado de Pagamentos"
+        
+        ws.append(["Posto/Graduação", "Nome de Guerra", "RGPM", "CPF", "Total de Horas", "Valor Total (R$)"])
+        
+        for dados in totais_por_militar.values():
+            pm = dados['militar']
+            ws.append([
+                pm.get_posto_graduacao_display(),
+                pm.nome_guerra,
+                pm.rgpm,
+                pm.cpf,
+                round(dados['total_horas'], 2),
+                round(dados['total_valor'], 2)
+            ])
+            
+        excel_buffer = io.BytesIO()
+        wb.save(excel_buffer)
+        excel_buffer.seek(0)
+
+        # 4. Criar o arquivo ZIP contendo a planilha e os recibos em PDF
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
+            
+            # Adiciona a planilha Excel ao ZIP
+            nome_excel = f"Planilha_GASP_{data_inicio.strftime('%d-%m-%Y')}_a_{data_fim.strftime('%d-%m-%Y')}.xlsx"
+            zip_file.writestr(nome_excel, excel_buffer.read())
+            
+            # 5. Gerar o Recibo em PDF individual para cada militar
+            for dados in totais_por_militar.values():
+                pm = dados['militar']
+                total_valor = dados['total_valor']
+                
+                pdf_buffer = io.BytesIO()
+                p = canvas.Canvas(pdf_buffer, pagesize=letter)
+                width, height = letter
+                
+                # Cabeçalho do Recibo
+                p.setFont("Helvetica-Bold", 12)
+                p.drawCentredString(width / 2.0, height - 50, "RECIBO - GABINETE DE APOIO À SEGURANÇA PÚBLICA")
+                
+                p.setFont("Helvetica", 10)
+                texto_recibo = (
+                    f"Eu, {pm.get_posto_graduacao_display().upper()} {pm.nome_guerra.upper()}, PORTADOR DO CPF Nº {pm.cpf}, "
+                    f"CONTA CORRENTE Nº {pm.conta_corrente or 'N/I'}, AGÊNCIA Nº {pm.agencia or 'N/I'}, "
+                    f"BANCO {pm.banco if hasattr(pm, 'banco') else 'N/I'}, RECEBI da Prefeitura Municipal de Rondonópolis – MT, "
+                    f"a importância líquida de R$ {total_valor:,.2f}, referentes à fiscalização do comércio ilegal ou irregular, "
+                    f"combate à depredação do patrimônio público, apoio à fiscalização ambiental, de trânsito e de licenças em geral, "
+                    f"policiamento ostensivo, além do apoio em geral às ações e atividades do município, junto ao GABINETE DE APOIO "
+                    f"À SEGURANÇA PÚBLICA no período de {data_inicio.strftime('%d/%m/%Y')} a {data_fim.strftime('%d/%m/%Y')}."
+                )
+                
+                # Desenhar texto com quebras automáticas simples usando ReportLab ou parágrafo se preferir
+                # Para simplificar na canvas direta, vamos desenhar blocos de texto formatados:
+                text_obj = p.beginText(50, height - 100)
+                text_obj.setFont("Helvetica", 10)
+                text_obj.setLeading(14)
+                
+                # Quebrando o texto longo em linhas manualmente para o PDF
+                import textwrap
+                for linha in textwrap.wrap(texto_recibo, width=95):
+                    text_obj.textLine(linha)
+                
+                p.drawText(text_obj)
+                
+                # Rodapé e Assinatura
+                p.drawString(50, height - 350, "Por ser verdade firmo o presente.")
+                p.drawString(50, height - 380, f"Rondonópolis – MT, ____/____/20____.")
+                
+                p.line(50, height - 460, 300, height - 460)
+                p.drawString(50, height - 475, f"{pm.get_posto_graduacao_display()} {pm.nome_guerra}")
+                p.drawString(50, height - 490, f"CPF: {pm.cpf}")
+                
+                p.showPage()
+                p.save()
+                
+                pdf_buffer.seek(0)
+                nome_pdf = f"Recibo_{pm.nome_guerra.replace(' ', '_')}.pdf"
+                zip_file.writestr(f"recibos/{nome_pdf}", pdf_buffer.read())
+
+        zip_buffer.seek(0)
+        
+        # Retorna o ZIP completo para o navegador
+        response = HttpResponse(zip_buffer.read(), content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename=Recibos_e_Planilha_{data_inicio}_a_{data_fim}.zip'
+        return response
+
+    return render(request, 'gerar_recibos.html')
